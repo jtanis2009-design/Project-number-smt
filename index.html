@@ -63,7 +63,6 @@ h1,h2,h3{font-family:var(--font-display);font-weight:400;letter-spacing:.02em;te
 .sel-status{font-weight:700;font-size:1.05rem}
 .sel-status .p1{color:var(--p1)} .sel-status .p2{color:var(--p2)}
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-@media (max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .card{position:relative;background:var(--panel);border:2px solid var(--line);padding:10px;display:flex;flex-direction:column;gap:6px;text-align:left;min-width:0}
 .card:hover{border-color:var(--muted)}
 .card .art{height:130px;display:flex;align-items:flex-end;justify-content:center;background:radial-gradient(ellipse at 50% 85%,var(--panel-2),transparent 70%)}
@@ -139,6 +138,34 @@ body.pad-over #pad{position:fixed;left:0;right:0;bottom:0;max-width:none;padding
 body.pad-over #pad .pb{pointer-events:auto;opacity:.45}
 body.pad-over #pad .dpad{grid-template-columns:repeat(3,50px);grid-template-rows:repeat(2,50px)}
 body.pad-over #pad .acts{grid-template-columns:repeat(2,62px);grid-template-rows:repeat(2,50px)}
+#pad .pset{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0;max-width:330px}
+#pad .ptag{font-size:.72rem;font-weight:700;letter-spacing:.12em}
+#pad .pset.p1 .ptag{color:var(--p1)} #pad .pset.p2 .ptag{color:var(--p2);text-align:right}
+#pad .grid8{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:46px;gap:5px}
+#pad .grid8 .pb{font-size:.66rem;letter-spacing:.02em}
+#pad .pset.p1 .pb:not(.sup){border-color:rgba(78,168,255,.55)} #pad .pset.p2 .pb:not(.sup){border-color:rgba(255,90,100,.55)}
+body.pad-over #pad.two .pset{flex:0 0 auto;width:216px}
+body.pad-over #pad.two .grid8{grid-auto-rows:42px}
+#keys{width:100%;max-width:1100px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:8px;font-size:.8rem}
+.krow{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;padding:6px 10px;background:var(--panel);border-left:4px solid var(--line);min-width:0}
+.krow.p1{border-left-color:var(--p1)} .krow.p2{border-left-color:var(--p2)}
+.krow b{font-size:.74rem;letter-spacing:.1em;text-transform:uppercase}
+.krow.p1 b{color:var(--p1)} .krow.p2 b{color:var(--p2)}
+.krow span{white-space:nowrap;color:var(--muted)}
+.krow kbd{color:var(--fg);margin-right:2px}
+.kalt{grid-column:1/-1;color:var(--muted);font-size:.76rem;margin:0}
+.sel-keys{display:grid;gap:8px}
+.sel-keys .krow{font-size:.85rem}
+@media (max-width:760px){
+  .grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .card{padding:5px;gap:2px}
+  .card .art{height:64px}
+  .card .nm{font-size:clamp(.5rem,2.6vw,.75rem);text-align:center;line-height:1.1}
+  .card .meta,.card .style,.card .statrow{display:none}
+  .card .tags{top:3px;left:3px}
+  .tag{font-size:.62rem;padding:1px 4px}
+  #select-screen .row-btns{position:sticky;bottom:0;z-index:5;background:var(--bg);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));border-top:2px solid var(--line)}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -161,7 +188,7 @@ body.pad-over #pad .acts{grid-template-columns:repeat(2,62px);grid-template-rows
       <button class="chip" data-diff="normal" aria-pressed="true">Normal</button>
       <button class="chip" data-diff="hard" aria-pressed="false">Hard</button>
     </div>
-    <p class="keys-hint">Player 1: <kbd>A</kbd><kbd>D</kbd> move, <kbd>W</kbd> jump, <kbd>S</kbd> block, <kbd>J</kbd><kbd>K</kbd><kbd>L</kbd><kbd>I</kbd> attack. On a phone, buttons appear under the fight.</p>
+    <p class="keys-hint">Player 1: <kbd>A</kbd><kbd>D</kbd> move, <kbd>W</kbd> jump, <kbd>S</kbd> block, <kbd>J</kbd><kbd>K</kbd><kbd>L</kbd><kbd>I</kbd> attack.<br>Player 2: arrow keys move, <kbd>↓</kbd> blocks, <kbd>,</kbd><kbd>.</kbd><kbd>/</kbd><kbd>Enter</kbd> attack. On a phone or tablet, buttons appear for both players.</p>
     <div class="stripe"></div>
   </section>
 
@@ -177,6 +204,7 @@ body.pad-over #pad .acts{grid-template-columns:repeat(2,62px);grid-template-rows
     <div class="grid" id="grid"></div>
     <div class="colors" id="colors" hidden></div>
     <div class="detail" id="detail"></div>
+    <div class="sel-keys" id="sel-keys"></div>
     <div class="row-btns">
       <button class="btn" id="sel-back">Back</button>
       <button class="btn primary" id="sel-fight" disabled>Fight</button>
@@ -206,11 +234,12 @@ body.pad-over #pad .acts{grid-template-columns:repeat(2,62px);grid-template-rows
           <tr><td>Move</td><td><kbd>←</kbd> <kbd>→</kbd></td></tr>
           <tr><td>Jump</td><td><kbd>↑</kbd></td></tr>
           <tr><td>Block (hold)</td><td><kbd>↓</kbd></td></tr>
-          <tr><td>Light attack</td><td><kbd>,</kbd> or <kbd>Num 1</kbd></td></tr>
-          <tr><td>Heavy attack</td><td><kbd>.</kbd> or <kbd>Num 2</kbd></td></tr>
-          <tr><td>Special</td><td><kbd>/</kbd> or <kbd>Num 3</kbd></td></tr>
-          <tr><td>Super (bar full)</td><td><kbd>Right Shift</kbd> or <kbd>Num 0</kbd></td></tr>
+          <tr><td>Light attack</td><td><kbd>,</kbd> or <kbd>7</kbd></td></tr>
+          <tr><td>Heavy attack</td><td><kbd>.</kbd> or <kbd>8</kbd></td></tr>
+          <tr><td>Special</td><td><kbd>/</kbd> or <kbd>9</kbd></td></tr>
+          <tr><td>Super (bar full)</td><td><kbd>Enter</kbd> or <kbd>0</kbd></td></tr>
         </table>
+        <p style="margin-top:10px">The number pad works too: <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>0</kbd>. On a phone or tablet, each player gets their own buttons.</p>
       </div>
       <div class="box">
         <h3>The basics</h3>
@@ -260,16 +289,8 @@ body.pad-over #pad .acts{grid-template-columns:repeat(2,62px);grid-template-rows
       </div>
     </div>
   </div>
-  <div id="pad" hidden>
-    <div class="cluster dpad">
-      <span></span><button class="pb" data-k="up">Jump</button><span></span>
-      <button class="pb" data-k="left">◀</button><button class="pb" data-k="block">Block</button><button class="pb" data-k="right">▶</button>
-    </div>
-    <div class="cluster acts">
-      <button class="pb" data-k="special">Special</button><button class="pb sup" data-k="super">Super</button>
-      <button class="pb" data-k="light">Light</button><button class="pb" data-k="heavy">Heavy</button>
-    </div>
-  </div>
+  <div id="keys" hidden></div>
+  <div id="pad" hidden></div>
 </div>
 
 <script>
@@ -1030,7 +1051,20 @@ const pressed = (inp, a) => inp.buf[a] > 0;
 const consume = (inp, a) => { inp.buf[a] = 0; };
 const KEYMAP1 = { KeyA: 'left', KeyD: 'right', KeyW: 'up', KeyS: 'block', KeyJ: 'light', KeyK: 'heavy', KeyL: 'special', KeyI: 'super' };
 const KEYMAP1_ALT = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'block' };
-const KEYMAP2 = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'block', Comma: 'light', Numpad1: 'light', Period: 'heavy', Numpad2: 'heavy', Slash: 'special', Numpad3: 'special', ShiftRight: 'super', Numpad0: 'super' };
+const KEYMAP2 = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'block',
+  Comma: 'light', Numpad1: 'light', Digit7: 'light',
+  Period: 'heavy', Numpad2: 'heavy', Digit8: 'heavy',
+  Slash: 'special', Numpad3: 'special', Digit9: 'special',
+  Enter: 'super', NumpadEnter: 'super', ShiftRight: 'super', Numpad0: 'super', Digit0: 'super' };
+const KEYHELP = [
+  [['Move', 'A', 'D'], ['Jump', 'W'], ['Block', 'S'], ['Light', 'J'], ['Heavy', 'K'], ['Special', 'L'], ['Super', 'I']],
+  [['Move', '←', '→'], ['Jump', '↑'], ['Block', '↓'], ['Light', ','], ['Heavy', '.'], ['Special', '/'], ['Super', 'Enter']]
+];
+function keyRows(mode) {
+  const row = i => `<div class="krow p${i + 1}"><b>Player ${i + 1}</b>${KEYHELP[i].map(([n, ...ks]) => `<span>${ks.map(k => `<kbd>${k}</kbd>`).join('')} ${n}</span>`).join('')}</div>`;
+  if (mode === '2p') return row(0) + row(1) + '<p class="kalt">Player 2 can also attack with the number keys <kbd>7</kbd> <kbd>8</kbd> <kbd>9</kbd> <kbd>0</kbd>, or the number pad <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>0</kbd>.</p>';
+  return row(0) + '<p class="kalt">You can also move with the arrow keys.</p>';
+}
 const IN = [newInput(), newInput()];
 
 /* ---------------- Game state ---------------- */
@@ -1878,7 +1912,8 @@ function showScreen(id) {
 }
 function showGame() {
   $('#menus').hidden = true; $('#game').hidden = false; $('#pause').hidden = true; G.paused = false;
-  $('#pad').hidden = !isTouch;
+  $('#pad').hidden = !isTouch; if (isTouch) buildPad();
+  $('#keys').hidden = isTouch; $('#keys').innerHTML = keyRows(G.mode);
   fit();
   startMatch();
   if (!running) { running = true; last = 0; acc = 0; requestAnimationFrame(loop); }
@@ -1945,6 +1980,9 @@ function renderSelect() {
     c.onmouseenter = c.onfocus = () => { focusKey = c.dataset.k; renderDetail(); };
   }
   $('#sel-fight').disabled = !(G.picks[0] && G.picks[1]);
+  $('#sel-keys').innerHTML = isTouch
+    ? `<div class="krow p1"><b>Controls</b><span>${G.mode === '2p' ? 'Each player gets their own buttons under the fight: blue for Player 1, red for Player 2.' : 'Buttons appear under the fight.'}</span></div>`
+    : keyRows(G.mode);
   const rows = [0, 1].filter(i => G.picks[i]).map(i => {
     const k = G.picks[i], lab = i === 0 ? 'Player 1 colour' : (G.mode === '1p' ? 'Computer colour' : 'Player 2 colour');
     return `<div class="crow"><span class="label p${i + 1}">${lab}</span>${SKINS.map((sk, j) =>
@@ -2006,15 +2044,24 @@ addEventListener('keyup', e => {
 });
 addEventListener('blur', () => { for (const i of IN) for (const a of ACTS) i[a] = false; });
 
-/* touch pad (player 1) */
+/* touch buttons: one set in 1 Player, one set for each player in 2 Players */
 const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
-for (const b of document.querySelectorAll('.pb')) {
-  const k = b.dataset.k;
-  const down = e => { e.preventDefault(); audioInit(); b.setPointerCapture && b.setPointerCapture(e.pointerId); b.classList.add('on'); press(IN[0], k); };
-  const up = e => { e.preventDefault(); b.classList.remove('on'); release(IN[0], k); };
-  b.addEventListener('pointerdown', down); b.addEventListener('pointerup', up);
-  b.addEventListener('pointercancel', up); b.addEventListener('lostpointercapture', up);
-  b.addEventListener('contextmenu', e => e.preventDefault());
+function buildPad() {
+  const pad = $('#pad'), two = G.mode === '2p';
+  const btn = (p, k, l, cls = '') => `<button class="pb ${cls}" data-p="${p}" data-k="${k}">${l}</button>`;
+  pad.innerHTML = two
+    ? [0, 1].map(p => `<div class="pset p${p + 1}"><span class="ptag">PLAYER ${p + 1}</span><div class="grid8">${btn(p, 'left', '◀')}${btn(p, 'up', 'Jump')}${btn(p, 'right', '▶')}${btn(p, 'block', 'Block')}${btn(p, 'light', 'Light')}${btn(p, 'heavy', 'Heavy')}${btn(p, 'special', 'Special')}${btn(p, 'super', 'Super', 'sup')}</div></div>`).join('')
+    : `<div class="cluster dpad"><span></span>${btn(0, 'up', 'Jump')}<span></span>${btn(0, 'left', '◀')}${btn(0, 'block', 'Block')}${btn(0, 'right', '▶')}</div>` +
+      `<div class="cluster acts">${btn(0, 'special', 'Special')}${btn(0, 'super', 'Super', 'sup')}${btn(0, 'light', 'Light')}${btn(0, 'heavy', 'Heavy')}</div>`;
+  pad.classList.toggle('two', two);
+  for (const b of pad.querySelectorAll('.pb')) {
+    const k = b.dataset.k, inp = IN[+b.dataset.p];
+    const down = e => { e.preventDefault(); audioInit(); b.setPointerCapture && b.setPointerCapture(e.pointerId); b.classList.add('on'); press(inp, k); };
+    const up = e => { e.preventDefault(); b.classList.remove('on'); release(inp, k); };
+    b.addEventListener('pointerdown', down); b.addEventListener('pointerup', up);
+    b.addEventListener('pointercancel', up); b.addEventListener('lostpointercapture', up);
+    b.addEventListener('contextmenu', e => e.preventDefault());
+  }
 }
 
 /* sizing */
@@ -2026,6 +2073,7 @@ function fit() {
   const aw = game.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
   let ah = game.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
   if (isTouch && !land) ah -= $('#pad').offsetHeight + 10;
+  if (!$('#keys').hidden) ah -= $('#keys').offsetHeight + 10;
   const w = Math.max(240, Math.min(aw, ah * 16 / 9));
   $('#stage').style.width = w + 'px'; $('#stage').style.height = (w * 9 / 16) + 'px';
 }
