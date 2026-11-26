@@ -45,7 +45,7 @@ h1,h2,h3{font-family:var(--font-display);font-weight:400;letter-spacing:.02em;te
 .logo span{color:var(--hazard)}
 .tagline{color:var(--muted);max-width:52ch;margin:0}
 .lineup{display:flex;gap:4px;align-items:flex-end;min-height:120px;overflow:hidden}
-.lineup img{height:clamp(90px,18vw,170px);width:auto;max-width:25%;object-fit:contain;filter:drop-shadow(0 6px 0 rgba(0,0,0,.5))}
+.lineup img{height:clamp(70px,13vw,150px);width:auto;max-width:12.5%;object-fit:contain;filter:drop-shadow(0 6px 0 rgba(0,0,0,.5))}
 .menu-btns{display:flex;flex-wrap:wrap;gap:12px}
 .btn{background:var(--panel-2);border:2px solid var(--line);padding:12px 20px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:.95rem;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
 .btn:hover{border-color:var(--hazard)}
@@ -295,6 +295,7 @@ const ROSTER = {
         }
       }
     },
+    aiFar() { return Math.random() < 0.3 ? 'special' : null; },
     onDeal(f, d, dmg, m) { if (m.rad) f.meterV = Math.min(100, f.meterV + m.rad); },
     moves: {
       light: { name: 'Claw Slash', s: 5, a: 4, r: 10, x: 15, y: -180, w: 135, h: 100, dmg: 48, stun: 17, kb: 5, rad: 12 },
@@ -329,14 +330,15 @@ const ROSTER = {
     name: 'Chaser', id: '0131', type: 'Human', ability: 'Speedrun', color: '#e8c030',
     style: 'Speedster', stats: { hp: 2, pow: 2, spd: 5 },
     blurb: 'The fastest fighter. Every hit makes him faster. Once he starts running, he cannot stop.',
-    hp: 1000, walk: 6.4, jumpV: 19, drawH: 228, bw: 76, bh: 195, reach: 135,
+    hp: 1050, walk: 6.4, jumpV: 19, drawH: 228, bw: 76, bh: 195, reach: 135,
     meter: { name: 'SPEED', max: 3, pips: true },
     walkMul: f => 1 + 0.1 * f.meterV, dmgMul: f => 1 + 0.08 * f.meterV,
+    aiFar() { return Math.random() < 0.12 ? 'special' : null; },
     passive(f) { f.noHit = (f.noHit || 0) + 1; if (f.noHit > 300 && f.meterV > 0) { f.meterV--; f.noHit = 0; } },
     onDeal(f) { if (f.atk && !f.atk.stacked) { f.atk.stacked = true; f.meterV = Math.min(3, f.meterV + 1); } f.noHit = 0; },
     onHurt(f, dmg, m) { if ((m.heavy || m.special || m.super) && f.meterV > 0) { f.meterV = 0; pop(f, 'CRASH!', '#e8c030'); } },
     moves: {
-      light: { name: "Chaser's Slash", s: 4, a: 3, r: 9, x: 15, y: -175, w: 125, h: 85, dmg: 44, stun: 16, kb: 4 },
+      light: { name: "Chaser's Slash", s: 4, a: 3, r: 9, x: 15, y: -175, w: 125, h: 85, dmg: 44, stun: 18, kb: 3 },
       heavy: { name: 'Knife Lunge', s: 9, a: 7, r: 16, x: 5, y: -175, w: 135, h: 95, dmg: 80, stun: 22, kb: 9, heavy: true,
         frame(f, o, a) { a.keepVx = a.t >= 9 && a.t < 16; if (a.keepVx) f.vx = f.face * 9; } },
       special: { name: 'Run Through', s: 7, a: 0, r: 0, cd: 55, special: true, hold: true,
@@ -436,6 +438,7 @@ const ROSTER = {
     hp: 1200, walk: 3.2, jumpV: 15.5, drawH: 268, bw: 110, bh: 230, reach: 175, chip: 0.04,
     meter: { name: 'STORE', max: 300 },
     onHurt(f, dmg) { f.meterV = Math.min(300, f.meterV + dmg * 0.3); },
+    aiFar() { return Math.random() < 0.3 ? 'special' : null; },
     onBlock(f, dmg) { f.meterV = Math.min(300, f.meterV + dmg); if (Math.random() < 0.35) pop(f, 'SWALLOWED', '#ff7a80'); },
     moves: {
       light: { name: 'Maw Bite', s: 7, a: 4, r: 12, x: 10, y: -200, w: 125, h: 100, dmg: 50, stun: 17, kb: 5 },
@@ -445,7 +448,7 @@ const ROSTER = {
         frame(f, o, a) {
           if (a.t === 14) {
             const st = f.meterV;
-            shoot(f, { dmg: Math.max(30, st * 0.5), r: 16 + st / 10, vx: 11, color: '#e0343c', y: -175 });
+            shoot(f, { dmg: Math.max(30, st * 0.45), r: 16 + st / 10, vx: 11, color: '#e0343c', y: -175 });
             const heal = Math.round(st * 0.25); f.hp = Math.min(f.d.hp, f.hp + heal); if (heal) pop(f, '+' + heal, '#7dff9a');
             f.meterV = 0; sfx('beam');
           }
@@ -473,7 +476,159 @@ const ROSTER = {
       special: 'Spits the Store back as a shot and heals a quarter of it. Needs 30 Store.',
       super: 'Grabs the enemy and bites six times. Heals with every bite.'
     }
+  },
+  soundemon: {
+    name: 'Soundemon', id: '0106', type: 'Demon', ability: 'Sound Demon', color: '#b07cff',
+    style: 'Summoner', stats: { hp: 2, pow: 3, spd: 4 },
+    blurb: 'Winner of Hide and Bleed. He can create anything with sound: weapons, bursts, and sound entities that fight for him.',
+    hp: 950, walk: 5.0, jumpV: 18, drawH: 232, bw: 82, bh: 200, reach: 165,
+    meter: { name: 'SOUND', max: 2, pips: true },
+    passive(f) { f.meterV = G.minions.filter(n => n.owner === f && n.life > 0).length; },
+    aiFar(f) { return f.meterV < 2 && Math.random() < 0.5 ? 'special' : null; },
+    moves: {
+      light: { name: 'Sound Claw', s: 5, a: 4, r: 10, x: 15, y: -175, w: 125, h: 95, dmg: 44, stun: 16, kb: 5 },
+      heavy: { name: 'Sound Weapon', s: 12, a: 6, r: 18, x: 5, y: -200, w: 180, h: 130, dmg: 80, stun: 22, kb: 10, heavy: true },
+      special: { name: 'Sound Entity', s: 12, a: 0, r: 16, cd: 130, special: true,
+        frame(f, o, a) {
+          if (a.t === 12) {
+            const mine = G.minions.filter(n => n.owner === f && n.life > 0);
+            let slot = mine.some(n => n.slot === 0) ? 1 : 0;
+            if (mine.length >= 2) { mine[0].life = 0; slot = mine[0].slot; }
+            G.minions.push({ owner: f, x: f.x, y: f.y - 150, t: 0, life: 320, slot });
+            ring(f.x, f.y - 150, 80, '#b07cff'); sfx('beam');
+          }
+        } },
+      super: { name: 'Full Volume', s: 18, a: 1, r: 26, super: true, unblock: true,
+        frame(f, o, a) {
+          if (a.t === 18) {
+            const mine = G.minions.filter(n => n.owner === f && n.life > 0);
+            shoot(f, { dmg: 150 + 50 * mine.length, r: 70, vx: 16, y: -120, color: '#b07cff', kind: 'wave', super: true, unblock: true, stun: 40, kb: 14 });
+            for (const n of mine) { ring(n.x, n.y, 120, '#b07cff'); n.life = 0; }
+            shake(14); sfx('boom');
+          }
+        } }
+    },
+    moveText: {
+      passive: ['Sound', 'He can have 2 Sound Entities at once. They float behind him and shoot sound waves.'],
+      light: 'A quick claw.', heavy: 'A long blade made of sound.',
+      special: 'Creates a Sound Entity that shoots for about 5 seconds. Making a third replaces the oldest.',
+      super: 'A huge sound wave across the screen. Every Sound Entity he has makes it stronger.'
+    }
+  },
+  redwalker: {
+    name: 'The Red Walker', id: '0124', type: 'Human', ability: "Doom's Curse", color: '#e0343c',
+    style: 'Risk taker', stats: { hp: 3, pow: 4, spd: 3 },
+    blurb: "Survived Skinwalker's Paradise. Doom's Curse makes him stronger and faster, but every Curse takes a piece of his skin.",
+    hp: 1060, walk: 4.5, jumpV: 17, drawH: 236, bw: 85, bh: 205, reach: 150,
+    meter: { name: 'CURSE', max: 5, pips: true },
+    walkMul: f => 1 + 0.1 * f.meterV, dmgMul: f => 1 + 0.15 * f.meterV,
+    reduce(f, dmg) { if (Math.random() < 0.15) { pop(f, 'SHIELD', '#3fb26a'); return Math.round(dmg / 2); } return dmg; },
+    aiFar(f) {
+      const r = Math.random();
+      if (r < 0.25 && !G.projs.some(p => p.owner === f && p.kind === 'shield')) return 'heavy';
+      if (r < 0.45 && f.meterV < 3 && f.hp > f.d.hp * 0.45) return 'special';
+      return null;
+    },
+    moves: {
+      light: { name: 'Shield Bash', s: 6, a: 4, r: 11, x: 15, y: -185, w: 125, h: 100, dmg: 48, stun: 17, kb: 6,
+        dyn: (a, f) => ({ dmg: 48 * (1 + 0.1 * f.meterV) }) },
+      heavy: { name: 'Shield Throw', s: 12, a: 1, r: 16, heavy: true,
+        cond: f => !G.projs.some(p => p.owner === f && p.kind === 'shield'),
+        alt: { name: 'Claw Swipe', s: 10, a: 5, r: 16, x: 10, y: -190, w: 140, h: 110, dmg: 70, stun: 22, kb: 9, heavy: true },
+        frame(f, o, a) { if (a.t === 12) { shoot(f, { dmg: 62, r: 30, vx: 14, y: -140, color: '#e0343c', kind: 'shield', boomer: 34, life: 400 }); sfx('whoosh'); } } },
+      special: { name: "Doom's Curse", s: 14, a: 0, r: 10, cd: 30, special: true, cond: f => f.meterV < 5, failText: 'MAX CURSE',
+        frame(f, o, a) {
+          if (a.t < 14 && a.t % 2 === 0) spark(f.x + rand(-90, 90), f.y - rand(0, 220), '#e0343c', 3, 16, f.x);
+          if (a.t === 14) {
+            f.meterV++;
+            const cost = Math.round(f.d.hp * (0.04 + 0.02 * f.meterV));
+            f.hp = Math.max(1, f.hp - cost);
+            pop(f, `CURSE ${f.meterV}`, '#e0343c'); burst(f.x, f.y - 120, '#e0343c', 18); sfx('charge');
+          }
+        } },
+      super: { name: 'Shield of Doom', s: 16, a: 1, r: 24, super: true, unblock: true,
+        frame(f, o, a) { if (a.t === 16) { shoot(f, { dmg: 48, r: 62, vx: 13, y: -130, color: '#e0343c', kind: 'shield', multi: 7, maxHits: 5, super: true, unblock: true, life: 200 }); sfx('dash'); } } }
+    },
+    moveText: {
+      passive: ['Curse', "Each Curse: +15% damage and +10% speed, but costs health (more each time). Curses reset every round. His shield halves 15% of the hits he takes."],
+      light: 'Hits with the shield. Stronger with more Curses.', heavy: 'Throws the shield. It flies back to him. While it is gone, this becomes a claw swipe.',
+      special: "Doom's Curse: +1 Curse (max 5). Costs health.",
+      super: 'A giant Shield of Doom that hits five times.'
+    }
+  },
+  hemo: {
+    name: 'Hemo', id: '0125', type: 'Demon', ability: 'Blood Flow', color: '#ff6a4d',
+    style: 'Charger', stats: { hp: 3, pow: 5, spd: 3 },
+    blurb: 'Fear of blood. Every touch on an enemy is a Tap. Blood Flow spends every Tap on a beam of deadly blood: 20 Taps is full power.',
+    hp: 1120, walk: 4.8, jumpV: 17.5, drawH: 232, bw: 82, bh: 200, reach: 150, keepMeter: true,
+    meter: { name: 'TAPS', max: 20 },
+    onDeal(f, d, dmg, m) { f.meterV = Math.min(20, f.meterV + (m.heavy ? 3 : 2) + (d.bleed > 0 ? 1 : 0)); },
+    onBlocked(f, d) { f.meterV = Math.min(20, f.meterV + 2); },
+    aiFar(f) { return f.meterV >= 12 && Math.random() < 0.45 ? 'special' : null; },
+    moves: {
+      light: { name: 'Thorn Touch', s: 5, a: 3, r: 9, x: 10, y: -175, w: 120, h: 90, dmg: 50, stun: 16, kb: 4 },
+      heavy: { name: 'Blood Brush', s: 11, a: 6, r: 17, x: 5, y: -195, w: 150, h: 125, dmg: 80, stun: 22, kb: 9, heavy: true,
+        onHit(f, o) { o.bleed = 240; pop(o, 'BLEEDING', '#ff6a4d'); } },
+      special: { name: 'Blood Flow', s: 16, a: 0, r: 22, cd: 45, special: true, cond: f => f.meterV >= 1, failText: 'NO TAPS',
+        frame(f, o, a) {
+          if (a.t < 16 && a.t % 2 === 0) spark(f.x + f.face * 50, f.y - 150, '#c4102a', 2 + f.meterV / 5, 14, f.x + f.face * 50);
+          if (a.t === 16) { const pw = f.meterV / 20; bloodBeam(f, o, pw, { dmg: 50 + 300 * pw }); f.meterV = 0; sfx(pw > 0.5 ? 'beamBig' : 'beam'); }
+        } },
+      super: { name: 'Blood Flood', s: 20, a: 1, r: 30, super: true, unblock: true,
+        frame(f, o, a) {
+          if (a.t === 20) { bloodBeam(f, o, 1, { dmg: 270, unblock: true, super: true, onHit: (x, y) => { y.bleed = 300; } }); shake(14); sfx('boom'); }
+        } }
+    },
+    moveText: {
+      passive: ['Taps', 'Every touch gives 2 Taps, even on a block (a heavy gives 3, max 20). Touching a Bleeding enemy gives an extra Tap. Taps stay from round to round.'],
+      light: 'A quick thorny touch. +2 Taps.', heavy: 'A big swipe that makes the enemy Bleed. +3 Taps.',
+      special: 'Spends every Tap on a blood beam across the screen. 1 Tap is weak, 20 Taps is huge. Jump over it.',
+      super: 'A full-power blood beam that goes through blocks and makes the enemy Bleed. Keeps your Taps.'
+    }
+  },
+  renku: {
+    name: 'Renku', id: '0011', type: 'Demon', ability: 'Void Slash', color: '#3fd16a',
+    style: 'Glass cannon', stats: { hp: 1, pow: 4, spd: 4 },
+    blurb: 'Slices through air, and through people as if they were nothing more than butter. Low health, but his Void Slash ignores blocks.',
+    hp: 870, walk: 5.5, jumpV: 18.5, drawH: 232, bw: 78, bh: 198, reach: 160, meter: null,
+    aiFar() { return Math.random() < 0.15 ? 'special' : null; },
+    moves: {
+      light: { name: 'Blade Flick', s: 4, a: 3, r: 10, x: 15, y: -170, w: 145, h: 90, dmg: 40, stun: 15, kb: 4 },
+      heavy: { name: 'Void Slash', s: 11, a: 4, r: 18, x: 10, y: -200, w: 165, h: 140, dmg: 64, stun: 22, kb: 9, heavy: true, unblock: true,
+        onHit(f, o) { G.cuts.push({ x: o.x, y: o.y - 110, ang: f.face * 0.5, t: 14 }); } },
+      special: { name: 'Rift Step', s: 16, a: 4, r: 16, x: 10, y: -190, w: 150, h: 120, dmg: 62, stun: 24, kb: 8, cd: 95, special: true,
+        frame(f, o, a) {
+          if (a.t < 10) f.inv = 2;
+          if (a.t === 8) {
+            G.rifts.push({ x: f.x, y: f.y - 100, t: 20 });
+            const side = Math.sign(f.x - o.x) || -1;
+            f.x = clamp(o.x - side * 115, LEFT + f.d.bw / 2, RIGHT - f.d.bw / 2);
+            f.face = Math.sign(o.x - f.x) || f.face;
+            G.rifts.push({ x: f.x, y: f.y - 100, t: 20 }); sfx('dash');
+          }
+        } },
+      super: { name: 'Void Blade', s: 14, hold: true, super: true, unblock: true,
+        frame(f, o, a) {
+          if (a.t < 14) { f.inv = 2; return; }
+          f.inv = 2;
+          if (a.k == null) { a.k = 0; o.lock = 60; }
+          if ((a.t - 14) % 7 === 0 && a.k < 5 && o.state !== 'ko') {
+            a.k++; const last = a.k === 5;
+            G.cuts.push({ x: o.x, y: o.y - 110, ang: rand(-0.7, 0.7), t: 14 });
+            o.lock = last ? 0 : 12;
+            landHit(f, o, { dmg: last ? 90 : 46, stun: last ? 36 : 24, kb: last ? 14 : 0, launch: last ? 9 : 0, unblock: true, super: true });
+          }
+          if (a.t > 14 + 5 * 7 + 12 || (o.state === 'ko' && a.t > 40)) f.atk = null;
+        } }
+    },
+    moveText: {
+      passive: ['Void', 'The lowest health of anyone, but fast, with long blades.'],
+      light: 'A quick, long-reaching blade flick.', heavy: 'Void Slash cuts straight through a block.',
+      special: 'Steps through a rift to behind the enemy, then slashes.',
+      super: 'Cuts the air five times. Wherever the enemy is, the cuts find them.'
+    }
   }
+
 };
 const KEYS = Object.keys(ROSTER);
 
@@ -544,7 +699,7 @@ const IN = [newInput(), newInput()];
 
 /* ---------------- Game state ---------------- */
 const G = {
-  phase: 'menu', mode: '1p', diff: 'normal', p: [], projs: [], parts: [], pops: [], after: [], waves: [], rings: [],
+  phase: 'menu', mode: '1p', diff: 'normal', p: [], projs: [], parts: [], pops: [], after: [], waves: [], rings: [], minions: [], beams: [], cuts: [], rifts: [],
   stop: 0, slow: 0, shake: 0, flash: null, banner: null, frame: 0, round: 1, wins: [0, 0], timer: 99, tick: 0, introT: 0, endT: 0, paused: false, picks: [null, null]
 };
 try { const d = localStorage.getItem('fc_diff'); if (d && ['easy', 'normal', 'hard'].includes(d)) G.diff = d; } catch (e) {}
@@ -559,7 +714,7 @@ class Fighter {
   reset() {
     this.x = this.side ? 880 : 400; this.y = GROUND; this.vx = 0; this.vy = 0; this.face = this.side ? -1 : 1;
     this.hp = this.d.hp; this.shown = this.hp; this.atk = null; this.hitstun = 0; this.blockstun = 0; this.lock = 0;
-    this.state = 'idle'; this.cd = 0; this.meterV = 0; this.slow = 0; this.inv = 0; this.flash = 0; this.ghost = false;
+    this.state = 'idle'; this.cd = 0; this.meterV = this.d.keepMeter ? (this.meterV || 0) : 0; this.bleed = 0; this.slow = 0; this.inv = 0; this.flash = 0; this.ghost = false;
     this.combo = 0; this.comboT = 0; this.aura = false; this.irr = 0; this.noHit = 0; this.ai = null;
   }
   get grounded() { return this.y >= GROUND - 0.5 && this.vy >= 0; }
@@ -573,8 +728,11 @@ function hitbox(f, m) { return { x: f.face > 0 ? f.x + m.x : f.x - m.x - m.w, y:
 function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 
 function startMove(f, name) {
-  const m = f.d.moves[name];
-  if (name === 'special' && m.cond && !m.cond(f)) { pop(f, m.failText || 'NOT READY', '#93a19e'); return false; }
+  let m = f.d.moves[name];
+  if (m.cond && !m.cond(f)) {
+    if (m.alt) m = m.alt;
+    else { pop(f, m.failText || 'NOT READY', '#93a19e'); return false; }
+  }
   f.atk = { m, name, t: 0, hit: false };
   if (f.grounded) f.vx = 0;
   if (name === 'special') f.cd = m.cd || 30;
@@ -592,7 +750,7 @@ function runMove(f, o) {
     if (a.t === m.s && !m.special) sfx('whoosh');
     if (overlap(hitbox(f, m), o.box())) {
       a.hit = true;
-      const extra = m.dyn ? m.dyn(a) : {};
+      const extra = m.dyn ? m.dyn(a, f) : {};
       landHit(f, o, Object.assign({}, m, extra));
     }
   }
@@ -631,6 +789,7 @@ function landHit(a, d, m) {
     return 'block';
   }
   dmg = Math.round(dmg);
+  if (d.d.reduce) dmg = d.d.reduce(d, dmg, m);
   const wasStun = d.hitstun > 0 || d.lock > 0;
   d.hp = Math.max(0, d.hp - dmg);
   d.atk = null; d.ghost = false; d.blockstun = 0;
@@ -659,24 +818,66 @@ function doKO(d, a) {
 
 /* ---------------- Projectiles ---------------- */
 function shoot(f, p) {
-  G.projs.push({ owner: f, x: f.x + f.face * 70, y: f.y + p.y, vx: f.face * p.vx, r: p.r, dmg: p.dmg, color: p.color, life: 120 });
+  G.projs.push(Object.assign({ life: 120, age: 0, hits: 0, hitCd: 0, stun: 22, kb: 7, vy: 0 }, p,
+    { owner: f, x: f.x + f.face * 70, y: f.y + p.y, vx: f.face * p.vx }));
 }
 function updateProjs() {
   for (const p of G.projs) {
-    p.x += p.vx; p.life--;
-    const o = G.p[p.owner.side ^ 1];
+    p.age++; p.life--; if (p.hitCd > 0) p.hitCd--;
+    const ow = p.owner, o = G.p[ow.side ^ 1];
+    if (p.kind === 'shield') p.spin = (p.spin || 0) + 0.45;
+    if (p.boomer) {
+      if (!p.back && (p.age >= p.boomer || p.x < LEFT || p.x > RIGHT)) { p.back = true; p.done = false; }
+      if (p.back) {
+        p.vx = clamp(p.vx + Math.sign(ow.x - p.x) * 1.4, -17, 17);
+        p.y += ((ow.y - 140) - p.y) * 0.12;
+        if (Math.abs(ow.x - p.x) < 50 && Math.abs(ow.y - 140 - p.y) < 80) { p.life = 0; continue; }
+        if (ow.state === 'ko') p.life = 0;
+      }
+    }
+    p.x += p.vx; p.y += p.vy;
     const b = o.box();
-    const cx = clamp(p.x, b.x, b.x + b.w), cy = clamp(p.y, b.y, b.y + b.h);
-    if (o.state !== 'ko' && (cx - p.x) ** 2 + (cy - p.y) ** 2 < p.r * p.r) {
-      landHit(p.owner, o, { dmg: p.dmg, stun: 22, kb: 7, special: true }); p.life = 0;
-      burst(p.x, p.y, p.color, 14);
+    const cx2 = clamp(p.x, b.x, b.x + b.w), cy2 = clamp(p.y, b.y, b.y + b.h);
+    if (o.state !== 'ko' && !p.done && p.hitCd === 0 && (cx2 - p.x) ** 2 + (cy2 - p.y) ** 2 < p.r * p.r) {
+      const last = p.multi && p.hits + 1 >= p.maxHits;
+      landHit(ow, o, { dmg: p.dmg, stun: p.stun, kb: p.multi && !last ? 0 : p.kb, launch: last ? 9 : 0, special: !p.super, super: p.super, unblock: p.unblock, onHit: p.onHit });
+      burst(p.x, p.y, p.color, 12);
+      if (p.multi) { p.hits++; p.hitCd = p.multi; p.vx = 0; if (last) p.life = Math.min(p.life, 8); else o.lock = p.multi + 2; }
+      else if (p.boomer) p.done = true;
+      else p.life = 0;
     }
     for (const q of G.projs) if (q !== p && q.owner !== p.owner && q.life > 0 && p.life > 0 && Math.abs(q.x - p.x) < p.r + q.r && Math.abs(q.y - p.y) < p.r + q.r) {
+      if (p.super && !q.super) { q.life = 0; continue; }
+      if (q.super && !p.super) { p.life = 0; continue; }
       p.life = 0; q.life = 0; burst((p.x + q.x) / 2, (p.y + q.y) / 2, '#ffffff', 18); sfx('block');
     }
-    if (p.x < LEFT - 60 || p.x > RIGHT + 60) p.life = 0;
+    if (!p.boomer && (p.x < LEFT - 80 || p.x > RIGHT + 80 || p.y > GROUND + 40)) p.life = 0;
   }
   G.projs = G.projs.filter(p => p.life > 0);
+}
+function updateMinions() {
+  for (const n of G.minions) {
+    const ow = n.owner, o = G.p[ow.side ^ 1];
+    n.t++; n.life--;
+    const tx = ow.x - ow.face * (80 + n.slot * 70), ty = ow.y - 250 - n.slot * 40 + Math.sin(n.t * 0.08 + n.slot * 2) * 12;
+    n.x += (tx - n.x) * 0.08; n.y += (ty - n.y) * 0.08;
+    if (G.phase === 'fight' && n.t % 100 === 50 && o.state !== 'ko') {
+      const dx = o.x - n.x, dir = Math.sign(dx) || 1, steps = Math.max(12, Math.abs(dx) / 8);
+      G.projs.push({ owner: ow, x: n.x, y: n.y, vx: dir * 8, vy: ((o.y - 110) - n.y) / steps, r: 15, dmg: 17, color: '#b07cff', kind: 'wave',
+        life: 170, age: 0, hits: 0, hitCd: 0, stun: 16, kb: 4 });
+      sfx('beam');
+    }
+    if (ow.state === 'ko') n.life = 0;
+  }
+  G.minions = G.minions.filter(n => n.life > 0);
+}
+function bloodBeam(f, o, power, opts) {
+  const y = f.y - 150, w = 16 + 44 * power;
+  G.beams.push({ x0: f.x + f.face * 50, x1: f.face > 0 ? W + 40 : -40, y, w, color: '#c4102a', t: 24, max: 24 });
+  const b = o.box(), front = Math.sign(o.x - f.x) === f.face || Math.abs(o.x - f.x) < 40;
+  if (front && o.state !== 'ko' && b.y < y + w / 2 && b.y + b.h > y - w / 2)
+    return landHit(f, o, Object.assign({ stun: 26, kb: 6 + 10 * power, special: true }, opts));
+  return false;
 }
 
 /* ---------------- Effects ---------------- */
@@ -696,6 +897,11 @@ function updateFighter(f, o) {
   if (f.inv > 0) f.inv--;
   if (f.flash > 0) f.flash--;
   if (f.comboT > 0 && --f.comboT === 0) f.combo = 0;
+  if (f.bleed > 0) {
+    f.bleed--;
+    if (f.bleed % 30 === 0 && f.state !== 'ko') { f.hp = Math.max(1, f.hp - 7); }
+    if (G.frame % 5 === 0) spark(f.x + rand(-30, 30), f.y - rand(60, f.d.bh), '#c4102a', 3, 22, null, 1);
+  }
   if (f.slow > 0 && G.frame % 6 === 0) spark(f.x + rand(-40, 40), f.y - rand(20, f.d.bh), '#9fd4ff', 2, 20);
   f.d.passive && f.d.passive(f, o);
 
@@ -757,7 +963,7 @@ function aiThink(f, o) {
   // follow-up after a light hit
   if (f.atk && f.atk.hit && !f.atk.aiTried && f.atk.name === 'light') {
     f.atk.aiTried = true;
-    if (Math.random() < P.combo) press(I, f.cd === 0 && Math.random() < 0.4 ? 'special' : 'heavy');
+    if (Math.random() < P.combo) press(I, f.cd === 0 && Math.random() < 0.4 && (f.key !== 'hemo' || f.meterV >= 12) ? 'special' : 'heavy');
   }
   for (const k of ['up', 'light', 'heavy', 'special', 'super']) I[k] = false;
   if (ai.t > 0) { ai.t--; return; }
@@ -773,19 +979,19 @@ function aiThink(f, o) {
     else { I.block = true; ai.t = 16; }
     return;
   }
-  const superRange = { radiant: 300, chaser: 900, doommaster: 1200, ixis: 200 }[f.key];
-  if (f.sup >= 100 && dist < superRange && Math.random() < P.sup && (f.key !== 'doommaster' || o.grounded)) { press(I, 'super'); return; }
+  const superRange = { radiant: 300, chaser: 900, ixis: 200, renku: 1400 }[f.key] ?? 1200;
+  const spec = f.d.moves.special;
+  const canSpec = f.cd === 0 && (!spec.cond || spec.cond(f));
+  if (f.sup >= 100 && dist < superRange && Math.random() < P.sup && (f.key !== 'doommaster' || o.grounded) && (f.key !== 'hemo' || Math.abs(o.y - f.y) < 60)) { press(I, 'super'); return; }
   if (dist > reach) {
-    const spec = f.d.moves.special;
-    const canSpec = f.cd === 0 && (!spec.cond || spec.cond(f));
-    if (canSpec && (f.key === 'radiant' || f.key === 'ixis') && Math.random() < 0.3) press(I, 'special');
-    else if (canSpec && f.key === 'chaser' && Math.random() < 0.12) press(I, 'special');
+    const act = f.d.aiFar ? f.d.aiFar(f, o) : null;
+    if (act && (act !== 'special' || canSpec)) press(I, act);
     else { I[toward] = true; if (Math.random() < 0.035) press(I, 'up'); }
   } else {
     const r = Math.random();
     if (r < P.aggr * 0.5) press(I, 'light');
     else if (r < P.aggr * 0.8) press(I, 'heavy');
-    else if (r < P.aggr * 0.92 && f.cd === 0 && (f.key !== 'doommaster' || f.meterV >= 2)) press(I, 'special');
+    else if (r < P.aggr * 0.92 && canSpec && (f.key !== 'doommaster' || f.meterV >= 2) && (f.key !== 'hemo' || f.meterV >= 12)) press(I, 'special');
     else if (r < 0.92) { I[away] = true; ai.t = 10; }
     else { I.block = true; ai.t = 14; }
   }
@@ -800,7 +1006,7 @@ function startMatch() {
 function startRound() {
   for (const f of G.p) { f.reset(); }
   for (const i of IN) for (const a of ACTS) { i[a] = false; i.buf[a] = 0; }
-  G.projs = []; G.parts = []; G.pops = []; G.after = []; G.waves = []; G.rings = [];
+  G.projs = []; G.parts = []; G.pops = []; G.after = []; G.waves = []; G.rings = []; G.minions = []; G.beams = []; G.cuts = []; G.rifts = [];
   G.timer = 99; G.tick = 0; G.phase = 'intro'; G.introT = 120; G.banner = null; G.slow = 0; G.stop = 0;
   sfx('bell');
 }
@@ -829,6 +1035,9 @@ function step() {
   for (const f of order) updateFighter(f, G.p[f.side ^ 1]);
   pushApart(a, b);
   updateProjs();
+  updateMinions();
+  for (const e of [G.beams, G.cuts, G.rifts]) for (const x of e) x.t--;
+  G.beams = G.beams.filter(x => x.t > 0); G.cuts = G.cuts.filter(x => x.t > 0); G.rifts = G.rifts.filter(x => x.t > 0);
   for (const i of IN) for (const k of ACTS) if (i.buf[k] > 0) i.buf[k]--;
   for (const p of G.parts) { p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life--; }
   G.parts = G.parts.filter(p => p.life > 0);
@@ -1014,6 +1223,7 @@ function drawHUD() {
     txt(full ? 'SUPER READY' : 'SUPER', left ? bx + 6 : bx + bw - 6, by + 8, 13, full ? '#15130a' : '#e8ecea', left ? 'left' : 'right', 'body', !full);
     // character meter
     const mm = f.d.meter, my = by - 30;
+    if (mm) {
     txt(mm.name, left ? bx : bx + bw, my + 7, 15, f.d.color, left ? 'left' : 'right', 'body');
     const mx0 = left ? bx + 70 : bx + bw - 70 - 200;
     if (mm.pips) {
@@ -1028,6 +1238,7 @@ function drawHUD() {
       const mw = 200 * clamp(f.meterV / mm.max, 0, 1);
       cx.fillStyle = f.d.color; cx.fillRect(left ? mx0 : mx0 + 200 - mw, my, mw, 14);
       if (f.key === 'radiant') { cx.fillStyle = 'rgba(255,255,255,.5)'; cx.fillRect(mx0 + 100 - 1, my - 2, 2, 18); }
+    }
     }
     // special ready
     const spOk = f.cd === 0 && (!f.d.moves.special.cond || f.d.moves.special.cond(f));
@@ -1073,7 +1284,43 @@ function draw() {
   const order = [...G.p].sort((p, q) => (p.atk ? 1 : 0) - (q.atk ? 1 : 0));
   for (const f of order) drawFighter(f);
   // projectiles
+  for (const n of G.minions) {
+    const al = Math.min(1, n.life / 30, n.t / 15);
+    cx.globalAlpha = al;
+    for (let i = 3; i >= 1; i--) { cx.strokeStyle = '#b07cff'; cx.lineWidth = 3; cx.globalAlpha = al * (0.5 - i * 0.1 + 0.1 * Math.sin(n.t * 0.2 + i)); cx.beginPath(); cx.arc(n.x, n.y, 14 + i * 9 + (n.t % 20) * 0.4, 0, 7); cx.stroke(); }
+    cx.globalAlpha = al; cx.fillStyle = '#1a1024'; cx.beginPath(); cx.arc(n.x, n.y, 18, 0, 7); cx.fill();
+    cx.strokeStyle = '#b07cff'; cx.lineWidth = 3; cx.stroke();
+    cx.fillStyle = '#ff2a3a'; cx.beginPath(); cx.ellipse(n.x, n.y, 8, 4, 0, 0, 7); cx.fill();
+    cx.globalAlpha = 1;
+  }
+  for (const bm of G.beams) {
+    const k = bm.t / bm.max, x0 = Math.min(bm.x0, bm.x1), x1 = Math.max(bm.x0, bm.x1);
+    cx.globalAlpha = k; cx.fillStyle = bm.color; cx.fillRect(x0, bm.y - bm.w / 2, x1 - x0, bm.w);
+    cx.fillStyle = '#ff8a8a'; cx.fillRect(x0, bm.y - bm.w / 6, x1 - x0, bm.w / 3);
+    for (let i = 0; i < 3; i++) spark(rand(x0, x1), bm.y + rand(-bm.w / 2, bm.w / 2), '#c4102a', 3, 16, null, rand(0, 2));
+    cx.globalAlpha = 1;
+  }
+  for (const r of G.rifts) { cx.globalAlpha = r.t / 20; cx.fillStyle = '#05140a'; cx.strokeStyle = '#3fd16a'; cx.lineWidth = 4; cx.beginPath(); cx.ellipse(r.x, r.y, 26 + (20 - r.t), 100, 0, 0, 7); cx.fill(); cx.stroke(); cx.globalAlpha = 1; }
+  for (const c of G.cuts) {
+    const k = c.t / 14, L = 900;
+    cx.save(); cx.translate(c.x, c.y); cx.rotate(c.ang); cx.globalAlpha = k;
+    cx.strokeStyle = '#3fd16a'; cx.lineWidth = 12 * k + 2; cx.beginPath(); cx.moveTo(-L, 0); cx.lineTo(L, 0); cx.stroke();
+    cx.strokeStyle = '#ffffff'; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(-L, 0); cx.lineTo(L, 0); cx.stroke();
+    cx.restore(); cx.globalAlpha = 1;
+  }
   for (const p of G.projs) {
+    if (p.kind === 'shield') {
+      cx.save(); cx.translate(p.x, p.y); cx.rotate(p.spin || 0);
+      for (let i = 0; i < 8; i++) { cx.fillStyle = i % 2 ? '#1a1a1a' : '#b81c24'; cx.beginPath(); cx.moveTo(0, 0); cx.arc(0, 0, p.r, i * Math.PI / 4, (i + 1) * Math.PI / 4); cx.fill(); }
+      cx.strokeStyle = '#3fb26a'; cx.lineWidth = Math.max(3, p.r / 6); cx.beginPath(); cx.moveTo(-p.r * 0.6, 0); cx.lineTo(p.r * 0.6, 0); cx.moveTo(0, -p.r * 0.6); cx.lineTo(0, p.r * 0.6); cx.stroke();
+      cx.strokeStyle = '#2a2f31'; cx.lineWidth = 4; cx.beginPath(); cx.arc(0, 0, p.r, 0, 7); cx.stroke();
+      cx.restore(); continue;
+    }
+    if (p.kind === 'wave') {
+      const d = Math.sign(p.vx) || 1;
+      for (let i = 0; i < 3; i++) { cx.strokeStyle = p.color; cx.globalAlpha = 0.9 - i * 0.25; cx.lineWidth = Math.max(3, p.r / 5); cx.beginPath(); cx.arc(p.x - d * i * p.r * 0.45, p.y, p.r * (1 - i * 0.15), d > 0 ? -1.1 : Math.PI - 1.1, d > 0 ? 1.1 : Math.PI + 1.1); cx.stroke(); }
+      cx.globalAlpha = 1; continue;
+    }
     for (let i = 4; i >= 0; i--) { cx.fillStyle = p.color; cx.globalAlpha = 0.12 * (5 - i); cx.beginPath(); cx.arc(p.x - Math.sign(p.vx) * i * 12, p.y, p.r * (1 - i * 0.12), 0, 7); cx.fill(); }
     cx.globalAlpha = 1; cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(p.x, p.y, p.r * 0.45, 0, 7); cx.fill();
   }
