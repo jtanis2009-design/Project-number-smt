@@ -22,6 +22,13 @@
   --alert:#e0343c;
   --p1:#4ea8ff;
   --p2:#ff5a64;
+  --dia-a:#3a1a12;
+  --dia-b:#4a2318;
+  --gold-hi:#ffe9a3;
+  --gold:#e9b949;
+  --gold-lo:#a66d10;
+  --ink:#1c0f06;
+  --legend:#f6dd4a;
   --font-display:"Black Ops One","Impact","Arial Black",sans-serif;
   --font-body:"Chakra Petch","Segoe UI",system-ui,sans-serif;
   color-scheme:dark;
@@ -166,6 +173,81 @@ body.pad-over #pad.two .grid8{grid-auto-rows:42px}
   .tag{font-size:.62rem;padding:1px 4px}
   #select-screen .row-btns{position:sticky;bottom:0;z-index:5;background:var(--bg);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));border-top:2px solid var(--line)}
 }
+/* select screen: fighter art on both sides, gold name plates, face grid, tips bar, button bar */
+#menus{background-color:var(--dia-a);background-image:radial-gradient(ellipse at 50% 35%,rgba(255,160,80,.16),transparent 65%),linear-gradient(45deg,var(--dia-b) 25%,transparent 25%,transparent 75%,var(--dia-b) 75%),linear-gradient(-45deg,var(--dia-b) 25%,transparent 25%,transparent 75%,var(--dia-b) 75%);background-size:auto,64px 64px,64px 64px}
+#select-screen.sel{position:fixed;inset:0;max-width:none;margin:0;gap:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;
+  background-color:var(--dia-a);background-image:radial-gradient(ellipse at 50% 30%,rgba(255,160,80,.2),transparent 60%),linear-gradient(45deg,var(--dia-b) 25%,transparent 25%,transparent 75%,var(--dia-b) 75%),linear-gradient(-45deg,var(--dia-b) 25%,transparent 25%,transparent 75%,var(--dia-b) 75%);background-size:auto,64px 64px,64px 64px;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#select-screen.sel[hidden]{display:none}
+.sel-stage{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:min(56vh,600px);position:relative;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sel-side{position:relative;display:flex;align-items:flex-end;min-width:0;--c:var(--hazard)}
+.sel-side.p1{justify-content:flex-end;padding-right:2%}
+.sel-side.p2{justify-content:flex-start;padding-left:2%}
+.sel-art{position:absolute;bottom:0;height:min(52vh,560px);max-width:66%;object-fit:contain;object-position:bottom;filter:drop-shadow(0 0 22px var(--c)) drop-shadow(0 10px 0 rgba(0,0,0,.45));pointer-events:none;transition:opacity .15s}
+.sel-side.p1 .sel-art{left:0}
+.sel-side.p2 .sel-art{right:0}
+.sel-art.empty{opacity:0}
+.sel-art.pop{animation:artIn .28s ease-out}
+@keyframes artIn{from{opacity:.2;translate:var(--from,-40px) 0}to{opacity:1;translate:0 0}}
+.sel-side.p2 .sel-art.pop{--from:40px}
+.plaque-wrap{position:relative;z-index:2;margin-bottom:6vh;display:flex;flex-direction:column;align-items:flex-start;max-width:100%}
+.sel-side.p2 .plaque-wrap{align-items:flex-end}
+.splat{position:absolute;inset:-30px -40px;z-index:-1;opacity:.85;
+  background:radial-gradient(circle at 22% 46%,var(--c) 0 16%,transparent 17%),radial-gradient(circle at 48% 58%,var(--c) 0 24%,transparent 25%),radial-gradient(circle at 74% 40%,var(--c) 0 15%,transparent 16%),radial-gradient(circle at 12% 70%,var(--c) 0 5%,transparent 6%),radial-gradient(circle at 88% 70%,var(--c) 0 6%,transparent 7%),radial-gradient(circle at 64% 18%,var(--c) 0 4%,transparent 5%),radial-gradient(circle at 34% 86%,var(--c) 0 4%,transparent 5%)}
+.who{font-weight:700;letter-spacing:.14em;font-size:.85rem;padding:0 .3em;text-shadow:0 2px 0 #000}
+.sel-side.p1 .who{color:var(--p1)} .sel-side.p2 .who{color:var(--p2)}
+.plaque{background:linear-gradient(180deg,var(--gold-hi),var(--gold) 45%,var(--gold-lo));padding:.12em 1.1em .18em;clip-path:polygon(5% 0,100% 0,95% 100%,0 100%);box-shadow:0 4px 0 rgba(0,0,0,.4)}
+.plaque span{font-family:var(--font-display);font-size:clamp(1.2rem,3.2vw,2.5rem);color:#fff;white-space:nowrap;
+  text-shadow:2px 0 0 var(--ink),-2px 0 0 var(--ink),0 2px 0 var(--ink),0 -2px 0 var(--ink),2px 2px 0 var(--ink),-2px -2px 0 var(--ink),2px -2px 0 var(--ink),-2px 2px 0 var(--ink),3px 4px 0 var(--ink)}
+.style-line{display:inline-flex;gap:.7em;align-items:center;background:rgba(10,6,4,.85);padding:.2em 1em;margin-top:6px;font-weight:700;font-size:.95rem}
+.style-line b{color:var(--c);letter-spacing:.08em;font-size:.8rem}
+.sub-line{font-size:.78rem;color:#f2dfc0;background:rgba(10,6,4,.7);padding:.1em .8em;margin-top:2px}
+.sw-row{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;max-width:330px}
+.sel-side.p2 .sw-row{justify-content:flex-end}
+.sw{width:44px;height:44px;padding:2px;background:rgba(10,6,4,.75);border:2px solid rgba(255,255,255,.18)}
+.sw img{width:100%;height:100%;object-fit:contain}
+.sw[aria-pressed="true"]{border-color:var(--gold-hi);box-shadow:0 0 0 2px var(--ink)}
+.state{margin-top:6px;font-size:.8rem;font-weight:700;letter-spacing:.06em;color:#f2dfc0;background:rgba(10,6,4,.7);padding:.1em .7em}
+.state.ready{background:var(--gold);color:var(--ink)}
+.icons{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;width:100%;max-width:1060px;margin:0 auto;padding:12px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+.ico{position:relative;aspect-ratio:1;padding:0;border:2px solid var(--ink);background:linear-gradient(160deg,var(--c),#140a06 80%);overflow:hidden;box-shadow:0 3px 0 rgba(0,0,0,.45)}
+.ico img{width:100%;height:100%;object-fit:cover;object-position:50% 8%;transform:scale(1.25);transform-origin:50% 0;pointer-events:none}
+.ico.flipx img{transform:scale(1.25) scaleX(-1)}
+.ico.c1{outline:3px solid var(--p1);outline-offset:1px;z-index:2}
+.ico.c2{outline:3px solid var(--p2);outline-offset:1px;z-index:2}
+.ico.c1.c2{outline-color:var(--gold-hi)}
+.ico .tg{position:absolute;top:1px;left:1px;display:flex;gap:2px}
+.ico .tg i{font-style:normal;font-size:.62rem;font-weight:700;padding:0 3px;color:#0b0d0e}
+.ico .tg .t1{background:var(--p1)} .ico .tg .t2{background:var(--p2)}
+.ico.taken1,.ico.taken2{filter:brightness(1.1)}
+.ticker{background:rgba(8,5,4,.88);border-block:1px solid rgba(233,185,73,.35);overflow:hidden;white-space:nowrap;padding:.45em 0;font-size:.95rem;color:#f6ead2}
+.ticker span{display:inline-block;padding-left:100%;animation:tick 26s linear infinite}
+@keyframes tick{to{transform:translateX(-100%)}}
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;background:var(--legend);color:var(--ink);font-weight:700;margin:10px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));padding:.5em 46px .5em 18px;clip-path:polygon(0 0,calc(100% - 30px) 0,100% 50%,calc(100% - 30px) 100%,0 100%);min-width:0}
+.lg-btn{background:transparent;border:0;color:var(--ink);font-weight:700;display:inline-flex;gap:6px;align-items:center;padding:.2em 0;font-size:.95rem}
+.lg-btn.go{background:var(--ink);color:var(--legend);padding:.3em 1.1em;margin-left:auto}
+.lg-btn:disabled{opacity:.4;cursor:not-allowed}
+.kc{background:var(--ink);color:var(--legend);border-radius:999px;min-width:1.7em;height:1.7em;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;padding:0 .4em}
+.lg-hint{font-size:.8rem;font-weight:600;opacity:.85}
+.moves-pop{position:fixed;inset:0;background:rgba(5,3,2,.78);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+.moves-card{background:var(--panel);border:2px solid var(--gold);max-width:640px;width:100%;max-height:86vh;overflow:auto;padding:18px;display:grid;gap:10px}
+.moves-card h3{font-size:1.8rem}
+.moves-card p{margin:0;color:var(--muted)}
+@media (max-width:760px){
+  .sel-stage{min-height:46vh}
+  .sel-art{height:30vh;max-width:92%}
+  .plaque-wrap{margin-bottom:2vh}
+  .plaque span{font-size:clamp(.85rem,4.4vw,1.3rem)}
+  .style-line{font-size:.75rem;padding:.15em .6em}
+  .sub-line{display:none}
+  .sw{width:32px;height:32px}
+  .icons{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+  .ticker{font-size:.8rem}
+  .legend{gap:4px 10px;padding-right:40px}
+  .lg-btn{font-size:.82rem}
+  .lg-hint{display:none}
+}
+body.touch .kc[data-kb]{display:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -193,21 +275,44 @@ body.pad-over #pad.two .grid8{grid-auto-rows:42px}
   </section>
 
   <!-- SELECT -->
-  <section class="screen" id="select-screen" hidden>
-    <div class="sel-head">
-      <div>
-        <p class="label" id="sel-mode">1 Player</p>
-        <h2 style="font-size:clamp(1.8rem,5vw,2.8rem)">Pick your fighters</h2>
+  <section class="screen sel" id="select-screen" hidden>
+    <div class="sel-stage">
+      <div class="sel-side p1" id="side0">
+        <img class="sel-art" id="art0" alt="">
+        <div class="plaque-wrap">
+          <div class="splat" aria-hidden="true"></div>
+          <span class="who" id="who0">PLAYER 1</span>
+          <div class="plaque"><span id="name0"></span></div>
+          <div class="style-line"><b>STYLE</b><span id="style0"></span></div>
+          <div class="sub-line" id="sub0"></div>
+          <div class="sw-row" id="sw0"></div>
+          <div class="state" id="state0"></div>
+        </div>
       </div>
-      <div class="sel-status" id="sel-status"></div>
+      <div class="sel-side p2" id="side1">
+        <img class="sel-art" id="art1" alt="">
+        <div class="plaque-wrap">
+          <div class="splat" aria-hidden="true"></div>
+          <span class="who" id="who1">PLAYER 2</span>
+          <div class="plaque"><span id="name1"></span></div>
+          <div class="style-line"><b>STYLE</b><span id="style1"></span></div>
+          <div class="sub-line" id="sub1"></div>
+          <div class="sw-row" id="sw1"></div>
+          <div class="state" id="state1"></div>
+        </div>
+      </div>
     </div>
-    <div class="grid" id="grid"></div>
-    <div class="colors" id="colors" hidden></div>
-    <div class="detail" id="detail"></div>
-    <div class="sel-keys" id="sel-keys"></div>
-    <div class="row-btns">
-      <button class="btn" id="sel-back">Back</button>
-      <button class="btn primary" id="sel-fight" disabled>Fight</button>
+    <div class="icons" id="icons"></div>
+    <div class="ticker" aria-live="polite"><span id="tick"></span></div>
+    <div class="legend">
+      <button class="lg-btn" id="sel-back"><span class="kc" data-kb>K</span>Back</button>
+      <button class="lg-btn" id="sel-moves"><span class="kc" data-kb>L</span>Move list</button>
+      <button class="lg-btn" id="sel-random"><span class="kc" data-kb>R</span>Random</button>
+      <span class="lg-hint" id="lg-hint"></span>
+      <button class="lg-btn go" id="sel-fight" disabled>Fight</button>
+    </div>
+    <div class="moves-pop" id="moves-pop" hidden>
+      <div class="moves-card" id="moves-card"></div>
     </div>
   </section>
 
@@ -1104,49 +1209,109 @@ function loadImages() {
       jobs.push(new Promise(r => { im.onload = r; im.onerror = r; }));
     }
   }
+  for (const k of KEYS) for (const sk of skinsOf(k)) if (sk.art) {
+    const im = new Image(); im.src = sk.art; ARTIMG[sk.art] = im; jobs.push(new Promise(r => { im.onload = r; im.onerror = r; }));
+  }
   return Promise.all(jobs);
 }
 
 /* ---------------- Colour skins (palette swaps) ---------------- */
-const SKINS = [
-  { name: 'Original', css: 'none' },
-  { name: 'Toxic', h: 110, s: 1.1, l: 0, css: 'hue-rotate(110deg) saturate(1.1)' },
-  { name: 'Abyss', h: 220, s: 1.0, l: -0.04, css: 'hue-rotate(220deg) brightness(.94)' },
-  { name: 'Tape', gray: true, css: 'grayscale(1) contrast(1.15)' }
-];
+/* Skins come from FAL125: each fighter's two named recolours (SKIN_DEFS there) plus its drawn art skins (ART_SKINS / legend skins there). */
+const FAL_SKINS = {
+  radiant: [['Hazard Yellow', 'hue-rotate(-70deg) saturate(1.6)'], ['Fallout Pink', 'hue-rotate(200deg) saturate(1.3)']],
+  fuja: [['Event Horizon', 'hue-rotate(150deg) saturate(1.3)'], ['Nebula Maw', 'hue-rotate(250deg) saturate(1.5)']],
+  eyianix: [['Bloodshot', 'hue-rotate(150deg) saturate(1.6)'], ['Night Watch', 'hue-rotate(210deg) brightness(.75)']],
+  bearer: [['Hellforged', 'hue-rotate(-60deg) saturate(1.5)'], ['Frostbite Legion', 'sepia(.8) saturate(3) hue-rotate(150deg)']],
+  chaser: [['Finish Line', 'hue-rotate(160deg) saturate(1.3)'], ['Burnt Out', 'saturate(.2) brightness(.9)']],
+  ixis: [['Bone White', 'grayscale(.9) brightness(1.15)'], ['Deep Maw', 'hue-rotate(200deg) saturate(1.2)']],
+  soundemon: [['Feedback', 'hue-rotate(200deg) saturate(1.2)'], ['Static', 'grayscale(.8) contrast(1.3)']],
+  redwalker: [['Green Walker', 'hue-rotate(110deg) saturate(1.1)'], ['Grey Walker', 'saturate(.15) brightness(1.1)']],
+  hemo: [['Bruise Blue', 'hue-rotate(160deg) saturate(1.2)'], ['Bleached', 'saturate(.2) brightness(1.15)']],
+  renku: [['Void Edge', 'hue-rotate(130deg) saturate(1.3)'], ['Amethyst Edge', 'hue-rotate(-70deg) saturate(1.3)']],
+  parda: [['Snow Fur', 'saturate(.3) brightness(1.3)'], ['Blue Eyes', 'hue-rotate(180deg) saturate(1.1)']],
+  weepingangel: [['Moonstone Mourner', 'sepia(1) saturate(3) hue-rotate(170deg)'], ['Rose Quartz Mourner', 'sepia(1) saturate(2.5) hue-rotate(290deg)']],
+  glacier: [['Northern Lights', 'hue-rotate(80deg) saturate(1.4)'], ['Thaw', 'hue-rotate(-30deg) saturate(.8) brightness(1.1)']],
+  copyright: [['Photocopy', 'grayscale(1) contrast(1.2)'], ['Blueprint', 'hue-rotate(190deg) saturate(1.5)']],
+  lycion: [['Blue X', 'hue-rotate(200deg) saturate(1.2)'], ['Bone Mask', 'saturate(.15) brightness(1.15)']],
+  tomb: [['White Spirit', 'hue-rotate(180deg) saturate(.6) brightness(1.15)'], ['Burnt Out', 'sepia(.6) saturate(.5) brightness(.75)']],
+  toon: [['Noir Reel', 'grayscale(.9) contrast(1.15)'], ['Technicolor', 'hue-rotate(140deg) saturate(1.5)']],
+  flick: [['Deep Flipside', 'hue-rotate(260deg) saturate(1.5) brightness(.85)'], ['Sea Rot', 'hue-rotate(150deg) saturate(1.4)']],
+  uquna: [['Blood Hell', 'sepia(1) hue-rotate(-30deg) saturate(3)'], ['Negative', 'invert(1) hue-rotate(180deg)']],
+  marrowline: [['Gunmetal', 'saturate(.35) brightness(1.15)'], ['Field Grey', 'sepia(.45) hue-rotate(45deg) saturate(.8)']]
+};
+const FAL_ART = {
+  fuja: [['drawing', 'Horror Drawing'], ['legend', 'Fuja · Legendary']],
+  radiant: [['drawing', 'Horror Drawing']],
+  eyianix: [['drawing', 'Horror Drawing']],
+  bearer: [['classic', 'Classic'], ['drawing', 'Horror Drawing'], ['legend', 'Bearer · Legendary']],
+  renku: [['scribble', 'Scribble Original']]
+};
+/* CSS filter functions as colour matrices, so the in-fight sprites match the CSS previews */
+function filterOps(css) {
+  const ops = [], re = /([a-z-]+)\(([-\d.]+)(deg|%)?\)/g; let m;
+  while ((m = re.exec(css))) {
+    let v = parseFloat(m[2]); if (m[3] === '%') v /= 100;
+    const fn = m[1];
+    if (fn === 'hue-rotate') {
+      const a = v * Math.PI / 180, c = Math.cos(a), n = Math.sin(a);
+      ops.push(['m', [0.213 + c * 0.787 - n * 0.213, 0.715 - c * 0.715 - n * 0.715, 0.072 - c * 0.072 + n * 0.928,
+        0.213 - c * 0.213 + n * 0.143, 0.715 + c * 0.285 + n * 0.140, 0.072 - c * 0.072 - n * 0.283,
+        0.213 - c * 0.213 - n * 0.787, 0.715 - c * 0.715 + n * 0.715, 0.072 + c * 0.928 + n * 0.072]]);
+    } else if (fn === 'saturate') {
+      ops.push(['m', [0.213 + 0.787 * v, 0.715 - 0.715 * v, 0.072 - 0.072 * v, 0.213 - 0.213 * v, 0.715 + 0.285 * v, 0.072 - 0.072 * v, 0.213 - 0.213 * v, 0.715 - 0.715 * v, 0.072 + 0.928 * v]]);
+    } else if (fn === 'grayscale') {
+      const g = 1 - Math.min(1, v);
+      ops.push(['m', [0.2126 + 0.7874 * g, 0.7152 - 0.7152 * g, 0.0722 - 0.0722 * g, 0.2126 - 0.2126 * g, 0.7152 + 0.2848 * g, 0.0722 - 0.0722 * g, 0.2126 - 0.2126 * g, 0.7152 - 0.7152 * g, 0.0722 + 0.9278 * g]]);
+    } else if (fn === 'sepia') {
+      const g = 1 - Math.min(1, v);
+      ops.push(['m', [0.393 + 0.607 * g, 0.769 - 0.769 * g, 0.189 - 0.189 * g, 0.349 - 0.349 * g, 0.686 + 0.314 * g, 0.168 - 0.168 * g, 0.272 - 0.272 * g, 0.534 - 0.534 * g, 0.131 + 0.869 * g]]);
+    } else if (fn === 'brightness') ops.push(['l', v, 0]);
+    else if (fn === 'contrast') ops.push(['l', v, 0.5 - 0.5 * v]);
+    else if (fn === 'invert') ops.push(['l', 1 - 2 * Math.min(1, v), Math.min(1, v)]);
+  }
+  return ops;
+}
+const SKIN_LIST = {};
+for (const k of KEYS) SKIN_LIST[k] = [{ name: 'Original', css: 'none' },
+  ...(FAL_SKINS[k] || []).map(([name, css]) => ({ name, css, ops: filterOps(css) })),
+  ...(FAL_ART[k] || []).map(([id, name]) => ({ name, css: 'none', art: `img/skin_${k}_${id}.webp` }))];
+const skinsOf = k => SKIN_LIST[k] || [{ name: 'Original', css: 'none' }];
+const ARTIMG = {}, EMPTY_IMG = new Image();
 const SKIN_CACHE = {};
-function recolor(img, sk) {
+function recolor(img, ops) {
   const w = img.naturalWidth, h = img.naturalHeight;
   if (!w) return img;
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   const g = c.getContext('2d'); g.drawImage(img, 0, 0);
   let data;
   try { data = g.getImageData(0, 0, w, h); } catch (e) { return img; }
-  const d = data.data;
+  const d = data.data, cl = v => v < 0 ? 0 : v > 1 ? 1 : v;
   for (let i = 0; i < d.length; i += 4) {
     if (d[i + 3] === 0) continue;
-    const r = d[i] / 255, gg = d[i + 1] / 255, b = d[i + 2] / 255;
-    if (sk.gray) {
-      let v = 0.3 * r + 0.59 * gg + 0.11 * b; v = clamp((v - 0.5) * 1.15 + 0.5, 0, 1);
-      d[i] = d[i + 1] = d[i + 2] = v * 255; continue;
+    let r = d[i] / 255, gg = d[i + 1] / 255, b = d[i + 2] / 255;
+    for (const op of ops) {
+      if (op[0] === 'm') { const M = op[1]; const r2 = M[0] * r + M[1] * gg + M[2] * b, g2 = M[3] * r + M[4] * gg + M[5] * b, b2 = M[6] * r + M[7] * gg + M[8] * b; r = cl(r2); gg = cl(g2); b = cl(b2); }
+      else { r = cl(r * op[1] + op[2]); gg = cl(gg * op[1] + op[2]); b = cl(b * op[1] + op[2]); }
     }
-    const mx = Math.max(r, gg, b), mn = Math.min(r, gg, b), l0 = (mx + mn) / 2, dl = mx - mn;
-    if (dl < 0.04) continue;
-    let hh, ss = l0 > 0.5 ? dl / (2 - mx - mn) : dl / (mx + mn);
-    if (mx === r) hh = (gg - b) / dl + (gg < b ? 6 : 0); else if (mx === gg) hh = (b - r) / dl + 2; else hh = (r - gg) / dl + 4;
-    hh = (hh / 6 + sk.h / 360) % 1; ss = clamp(ss * sk.s, 0, 1); const l = clamp(l0 + sk.l, 0, 1);
-    const q = l < 0.5 ? l * (1 + ss) : l + ss - l * ss, p = 2 * l - q;
-    const f = t => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < 1 / 2 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
-    d[i] = f(hh + 1 / 3) * 255; d[i + 1] = f(hh) * 255; d[i + 2] = f(hh - 1 / 3) * 255;
+    d[i] = r * 255; d[i + 1] = gg * 255; d[i + 2] = b * 255;
   }
   g.putImageData(data, 0, 0);
   return c;
 }
-function skinSet(k, skin) {
-  if (!skin) return IMG[k];
-  const id = k + ':' + skin;
-  if (!SKIN_CACHE[id]) { const o = {}; for (const slot in IMG[k]) o[slot] = recolor(IMG[k][slot], SKINS[skin]); SKIN_CACHE[id] = o; }
+function skinSet(k, idx) {
+  const list = skinsOf(k), sk = list[idx] || list[0];
+  if (sk === list[0]) return IMG[k];
+  const id = k + ':' + idx;
+  if (!SKIN_CACHE[id]) {
+    if (sk.art) SKIN_CACHE[id] = { idle: (ARTIMG[sk.art] && ARTIMG[sk.art].naturalWidth) ? ARTIMG[sk.art] : IMG[k].idle, atk: EMPTY_IMG, ko: EMPTY_IMG };
+    else { const o = {}; for (const slot in IMG[k]) o[slot] = recolor(IMG[k][slot], sk.ops); SKIN_CACHE[id] = o; }
+  }
   return SKIN_CACHE[id];
+}
+function skinPreview(k, idx, pose) {
+  const list = skinsOf(k), sk = list[idx] || list[0];
+  if (sk.art) return { src: sk.art, filter: 'none' };
+  return { src: `img/${k}${pose || ''}.webp`, filter: sk.css };
 }
 const iw = im => im.naturalWidth || im.width, ih = im => im.naturalHeight || im.height;
 
@@ -1692,7 +1857,7 @@ function aiThink(f, o) {
 /* ---------------- Rounds ---------------- */
 function startMatch() {
   let s1 = G.skins[1];
-  if (G.picks[0] === G.picks[1] && G.skins[0] === s1) s1 = (s1 + 1) % SKINS.length;
+  if (G.picks[0] === G.picks[1] && G.skins[0] === s1) s1 = (s1 + 1) % skinsOf(G.picks[1]).length;
   G.p = [new Fighter(G.picks[0], 0, G.skins[0]), new Fighter(G.picks[1], 1, s1)];
   for (const f of G.p) skinSet(f.key, f.skin);
   G.wins = [0, 0]; G.round = 1;
@@ -2166,7 +2331,8 @@ function showGame() {
 function showEnd(w) {
   const f = G.p[w];
   $('#win-img').onerror = () => { $('#win-img').onerror = null; $('#win-img').src = `img/${f.key}.webp`; };
-  $('#win-img').src = `img/${f.key}_atk.webp`; $('#win-img').alt = f.d.name; $('#win-img').style.filter = SKINS[f.skin].css;
+  const wp = skinPreview(f.key, f.skin, '_atk');
+  $('#win-img').src = wp.src; $('#win-img').alt = f.d.name; $('#win-img').style.filter = wp.filter;
   $('#win-who').textContent = w === 0 ? 'Player 1 wins' : (G.mode === '1p' ? 'The computer wins' : 'Player 2 wins');
   $('#win-name').textContent = f.d.name;
   $('#win-name').style.color = f.d.color;
@@ -2196,64 +2362,147 @@ function moveList(k) {
 }
 $('#help-fighters').innerHTML = KEYS.map(k => `<div class="box"><h3 style="color:${ROSTER[k].color}">${ROSTER[k].name}</h3>${moveList(k)}</div>`).join('');
 
-/* select */
-let focusKey = 'radiant';
+/* select: each side has its own cursor. Pick a fighter, choose a colour, then confirm. */
+const SEL = { cur: [0, 0], ready: [false, false], focus: 'radiant', shown: [null, null], tipKey: null };
+const TIPS = ['A light hit that lands can go straight into a heavy or a special.', 'Every super goes through a block.', 'Hold block, but watch out: grabs and some specials go through it.', 'The yellow bar fills when you hit or get hit. When it is full, use your super.'];
+function selCols() { const n = getComputedStyle($('#icons')).gridTemplateColumns.split(' ').length; return n || 10; }
+function slotCtl() { if (!SEL.ready[0]) return 0; if (!SEL.ready[1]) return 1; return -1; }
+function slotBrowsing(s) { return G.picks[s] == null && (G.mode === '2p' || s === 0 || SEL.ready[0]); }
 function openSelect() {
-  G.picks = [null, null]; G.skins = [0, 0];
-  $('#sel-mode').textContent = G.mode === '1p' ? `1 Player · Computer: ${G.diff[0].toUpperCase() + G.diff.slice(1)}` : '2 Players';
-  showScreen('select-screen'); renderSelect();
+  G.picks = [null, null]; G.skins = [0, 0]; SEL.ready = [false, false]; SEL.cur = [0, KEYS.length - 1]; SEL.shown = [null, null];
+  document.body.classList.toggle('touch', isTouch);
+  $('#who1').textContent = G.mode === '1p' ? 'COM' : 'PLAYER 2';
+  $('#lg-hint').innerHTML = isTouch ? '' : G.mode === '2p'
+    ? 'P1: <b>A D W S</b> move · <b>J</b> pick · <b>K</b> back &nbsp;|&nbsp; P2: <b>arrows</b> · <b>,</b> pick · <b>.</b> back'
+    : '<b>A D W S</b> or <b>arrows</b> move · <b>J</b> or <b>Enter</b> pick · then <b>A D</b> colour';
+  showScreen('select-screen'); buildIcons(); renderSelect();
+}
+function buildIcons() {
+  $('#icons').innerHTML = KEYS.map((k, i) => `<button class="ico${ROSTER[k].faceLeft ? ' flipx' : ''}" data-i="${i}" style="--c:${ROSTER[k].color}" aria-label="${ROSTER[k].name}"><img src="img/${k}.webp" alt="" draggable="false"><span class="tg"></span></button>`).join('');
+  for (const b of document.querySelectorAll('.ico')) {
+    const i = +b.dataset.i;
+    b.onclick = () => selPointer(i);
+    b.onmouseenter = () => { const s = G.picks[0] == null ? 0 : G.picks[1] == null ? 1 : -1; if (s >= 0 && slotBrowsing(s)) { SEL.cur[s] = i; SEL.focus = KEYS[i]; renderSelect(); } };
+  }
+}
+function selPointer(i) {
+  audioInit();
+  let s = G.picks[0] == null ? 0 : G.picks[1] == null ? 1 : 1;
+  if (s === 1) { SEL.ready[0] = true; if (G.picks[1] != null) { G.picks[1] = null; SEL.ready[1] = false; } }
+  SEL.cur[s] = i; selConfirm(s);
+}
+function selMove(s, dx, dy) {
+  if (s < 0) return;
+  if (G.picks[s] == null) {
+    if (!slotBrowsing(s)) return;
+    const n = KEYS.length, c = selCols(); let i = SEL.cur[s];
+    if (dx) i = (i + dx + n) % n;
+    if (dy) { i += dy * c; if (i < 0) i += Math.ceil(n / c) * c; if (i >= n) i %= c; i = clamp(i, 0, n - 1); }
+    SEL.cur[s] = i; SEL.focus = KEYS[i]; tone(520, 560, 0.04, 'square', 0.03);
+  } else if (!SEL.ready[s] && dx) {
+    const L = skinsOf(G.picks[s]).length; G.skins[s] = (G.skins[s] + dx + L) % L; tone(700, 760, 0.04, 'square', 0.03);
+  }
+  renderSelect();
+}
+function selConfirm(s) {
+  if (s < 0) return;
+  if (G.picks[s] == null) {
+    if (!slotBrowsing(s)) return;
+    const k = KEYS[SEL.cur[s]]; G.picks[s] = k; G.skins[s] = 0; SEL.focus = k;
+    const o = s ^ 1; if (G.picks[o] === k && G.skins[o] === 0) G.skins[s] = 1 % skinsOf(k).length;
+    sfx('bell');
+  } else if (!SEL.ready[s]) { SEL.ready[s] = true; sfx('jump'); }
+  renderSelect(); maybeStart();
+}
+function selBack(s) {
+  if (s < 0) s = 1;
+  if (SEL.ready[s]) SEL.ready[s] = false;
+  else if (G.picks[s] != null) G.picks[s] = null;
+  else if (s === 1 && G.mode === '1p') { SEL.ready[0] = false; }
+  else if (G.picks[0] == null && G.picks[1] == null) { showScreen('title-screen'); return; }
+  renderSelect();
+}
+function selRandom(s) {
+  if (s < 0 || G.picks[s] != null) return;
+  SEL.cur[s] = Math.floor(Math.random() * KEYS.length); selConfirm(s);
+  G.skins[s] = Math.floor(Math.random() * skinsOf(G.picks[s]).length); renderSelect();
+}
+let startTimer = 0;
+function maybeStart() {
+  if (!(SEL.ready[0] && SEL.ready[1])) return;
+  clearTimeout(startTimer);
+  startTimer = setTimeout(() => { if (!$('#select-screen').hidden && SEL.ready[0] && SEL.ready[1]) { audioInit(); showGame(); } }, 500);
 }
 function renderSelect() {
-  const nm = i => G.picks[i] ? ROSTER[G.picks[i]].name : '…';
-  const p2 = G.mode === '1p' ? 'Computer' : 'Player 2';
-  const who = G.picks[0] == null ? 'Player 1' : G.picks[1] == null ? p2 : null;
-  $('#sel-status').innerHTML = `<span class="p1">Player 1: ${nm(0)}</span> &nbsp;vs&nbsp; <span class="p2">${p2}: ${nm(1)}</span>` +
-    `<div class="label" style="margin-top:4px">${who ? `${who}, pick a fighter` : 'Ready. Press Fight.'}</div>`;
-  $('#grid').innerHTML = KEYS.map(k => {
-    const d = ROSTER[k], s = d.stats, p1 = G.picks[0] === k, p2s = G.picks[1] === k;
-    const bar = (lab, v) => `<div class="statrow"><span>${lab}</span><div class="bar"><i style="width:${v * 20}%;background:${d.color}"></i></div></div>`;
-    return `<button class="card${p1 ? ' is-p1' : ''}${p2s ? ' is-p2' : ''}" data-k="${k}" aria-label="Pick ${d.name}">
-      <div class="tags">${p1 ? '<span class="tag p1">P1</span>' : ''}${p2s ? `<span class="tag p2">${G.mode === '1p' ? 'CPU' : 'P2'}</span>` : ''}</div>
-      <div class="art"><img src="img/${k}.webp" alt="" style="filter:${p1 ? SKINS[G.skins[0]].css : p2s ? SKINS[G.skins[1]].css : 'none'}"></div>
-      <div class="nm" style="color:${d.color}">${d.name}</div>
-      <div class="meta">ID ${d.id} · ${d.type} · ${d.ability}</div>
-      <div class="style">${d.style}</div>
-      ${bar('Health', s.hp)}${bar('Power', s.pow)}${bar('Speed', s.spd)}
-    </button>`;
-  }).join('');
-  for (const c of document.querySelectorAll('.card')) {
-    c.onclick = () => pickCard(c.dataset.k);
-    c.onmouseenter = c.onfocus = () => { focusKey = c.dataset.k; renderDetail(); };
+  for (const s of [0, 1]) {
+    const browsing = slotBrowsing(s), picked = G.picks[s] != null;
+    const k = picked ? G.picks[s] : browsing ? KEYS[SEL.cur[s]] : null;
+    const side = $('#side' + s), art = $('#art' + s);
+    if (!k) {
+      art.classList.add('empty'); side.style.setProperty('--c', 'rgba(255,255,255,.15)');
+      $('#name' + s).textContent = '???'; $('#style' + s).textContent = '—'; $('#sub' + s).textContent = ''; $('#sw' + s).innerHTML = '';
+      $('#state' + s).textContent = 'Waiting for Player 1'; $('#state' + s).className = 'state'; SEL.shown[s] = null; continue;
+    }
+    const d = ROSTER[k], pv = skinPreview(k, picked ? G.skins[s] : 0);
+    side.style.setProperty('--c', d.color);
+    const id = k + ':' + (picked ? G.skins[s] : 0);
+    if (SEL.shown[s] !== id) {
+      art.classList.remove('empty'); art.src = pv.src; art.alt = d.name; art.style.filter = `${pv.filter === 'none' ? '' : pv.filter} drop-shadow(0 0 22px ${d.color}) drop-shadow(0 10px 0 rgba(0,0,0,.45))`;
+      const flip = (s === 1) !== !!d.faceLeft; art.style.transform = flip ? 'scaleX(-1)' : '';
+      if (!SEL.shown[s] || SEL.shown[s].split(':')[0] !== k) { art.classList.remove('pop'); void art.offsetWidth; art.classList.add('pop'); }
+      SEL.shown[s] = id;
+    }
+    $('#name' + s).textContent = d.name;
+    $('#style' + s).textContent = d.style;
+    $('#sub' + s).textContent = `ID ${d.id} · ${d.type} · ${d.ability}`;
+    const list = skinsOf(k);
+    $('#sw' + s).innerHTML = picked ? list.map((sk, j) => { const p = skinPreview(k, j); return `<button class="sw" data-s="${s}" data-j="${j}" aria-pressed="${G.skins[s] === j}" title="${sk.name}" aria-label="Colour: ${sk.name}"><img src="${p.src}" alt="" style="filter:${p.filter}${(s === 1) !== !!d.faceLeft ? ';transform:scaleX(-1)' : ''}"></button>`; }).join('') : '';
+    const st = $('#state' + s);
+    st.className = 'state' + (SEL.ready[s] ? ' ready' : '');
+    st.textContent = SEL.ready[s] ? `READY · ${list[G.skins[s]].name}` : picked ? (isTouch ? `Colour: ${list[G.skins[s]].name}` : `Colour: ${list[G.skins[s]].name} · ${s === 1 && G.mode === '2p' ? ', ' : 'J'} to lock in`) : (isTouch ? 'Tap a fighter' : 'Choose a fighter');
   }
+  for (const sw of document.querySelectorAll('.sw')) sw.onclick = () => { const s = +sw.dataset.s; G.skins[s] = +sw.dataset.j; SEL.ready[s] = false; renderSelect(); };
+  document.querySelectorAll('.ico').forEach((b, i) => {
+    const k = KEYS[i];
+    b.classList.toggle('c1', slotBrowsing(0) && SEL.cur[0] === i);
+    b.classList.toggle('c2', slotBrowsing(1) && SEL.cur[1] === i);
+    const t1 = G.picks[0] === k || (slotBrowsing(0) && SEL.cur[0] === i), t2 = G.picks[1] === k || (slotBrowsing(1) && SEL.cur[1] === i);
+    b.querySelector('.tg').innerHTML = (t1 ? '<i class="t1">1P</i>' : '') + (t2 ? `<i class="t2">${G.mode === '1p' ? 'COM' : '2P'}</i>` : '');
+  });
   $('#sel-fight').disabled = !(G.picks[0] && G.picks[1]);
-  $('#sel-keys').innerHTML = isTouch
-    ? `<div class="krow p1"><b>Controls</b><span>${G.mode === '2p' ? 'Each player gets their own buttons under the fight: blue for Player 1, red for Player 2.' : 'Buttons appear under the fight.'}</span></div>`
-    : keyRows(G.mode);
-  const rows = [0, 1].filter(i => G.picks[i]).map(i => {
-    const k = G.picks[i], lab = i === 0 ? 'Player 1 colour' : (G.mode === '1p' ? 'Computer colour' : 'Player 2 colour');
-    return `<div class="crow"><span class="label p${i + 1}">${lab}</span>${SKINS.map((sk, j) =>
-      `<button class="swatch" data-p="${i}" data-s="${j}" aria-pressed="${G.skins[i] === j}"><img src="img/${k}.webp" alt="" style="filter:${sk.css}"><span>${sk.name}</span></button>`).join('')}</div>`;
-  }).join('');
-  const same = G.picks[0] && G.picks[0] === G.picks[1] && G.skins[0] === G.skins[1];
-  $('#colors').innerHTML = rows + (same ? '<p class="keys-hint">Same fighter, same colour: the second one will use the next colour so you can tell them apart.</p>' : '');
-  $('#colors').hidden = !rows;
-  for (const b of document.querySelectorAll('.swatch')) b.onclick = () => { G.skins[+b.dataset.p] = +b.dataset.s; renderSelect(); };
-  renderDetail();
+  if (SEL.tipKey !== SEL.focus) {
+    SEL.tipKey = SEL.focus; const d = ROSTER[SEL.focus], tip = TIPS[Math.floor(Math.random() * TIPS.length)];
+    const el = $('#tick'); el.textContent = `${d.name} · ${d.moveText.passive[0]}: ${d.moveText.passive[1]}     ★     Tip: ${tip}`;
+    el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
+  }
 }
-function renderDetail() {
-  const d = ROSTER[focusKey];
-  $('#detail').innerHTML = `<div><p class="label">ID ${d.id} · ${d.type} · ${d.style}</p><h3 style="color:${d.color}">${d.name}</h3><p>${d.blurb}</p></div>${moveList(focusKey)}`;
+function toggleMoves(show) {
+  const pop = $('#moves-pop'), on = show ?? pop.hidden;
+  if (on) { const d = ROSTER[SEL.focus]; $('#moves-card').innerHTML = `<p class="label">ID ${d.id} · ${d.type} · ${d.style}</p><h3 style="color:${d.color}">${d.name}</h3><p>${d.blurb}</p>${moveList(SEL.focus)}<button class="btn" id="moves-close">Close</button>`; $('#moves-close').onclick = () => toggleMoves(false); }
+  pop.hidden = !on;
 }
-function pickCard(k) {
-  focusKey = k;
-  if (G.picks[0] == null) { G.picks[0] = k; G.skins[0] = 0; }
-  else if (G.picks[1] == null) { G.picks[1] = k; G.skins[1] = 0; }
-  else { G.picks = [k, null]; G.skins = [0, 0]; }
-  renderSelect();
-  const next = document.querySelector(`.card[data-k="${k}"]`); next && next.focus({ preventScroll: true });
-}
-$('#sel-back').onclick = () => showScreen('title-screen');
-$('#sel-fight').onclick = () => { audioInit(); showGame(); };
+$('#moves-pop').onclick = e => { if (e.target.id === 'moves-pop') toggleMoves(false); };
+$('#sel-back').onclick = () => selBack(G.mode === '2p' ? (G.picks[1] != null || SEL.ready[1] ? 1 : 0) : slotCtl());
+$('#sel-moves').onclick = () => toggleMoves();
+$('#sel-random').onclick = () => { audioInit(); const s = G.picks[0] == null ? 0 : G.picks[1] == null ? 1 : -1; if (s === 1) SEL.ready[0] = true; selRandom(s); };
+$('#sel-fight').onclick = () => { if (!(G.picks[0] && G.picks[1])) return; SEL.ready = [true, true]; audioInit(); clearTimeout(startTimer); showGame(); };
+addEventListener('keydown', e => {
+  if ($('#select-screen').hidden || !$('#game').hidden || e.repeat) return;
+  if (!$('#moves-pop').hidden) { if (['Escape', 'KeyL', 'Slash', 'Enter', 'Space', 'KeyJ'].includes(e.code)) { toggleMoves(false); e.preventDefault(); } return; }
+  const two = G.mode === '2p', me = two ? 0 : slotCtl();
+  const D1 = { KeyA: [-1, 0], KeyD: [1, 0], KeyW: [0, -1], KeyS: [0, 1] }, D2 = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+  audioInit();
+  if (D1[e.code]) selMove(me, ...D1[e.code]);
+  else if (D2[e.code]) selMove(two ? 1 : me, ...D2[e.code]);
+  else if (e.code === 'KeyJ' || e.code === 'Space' || (!two && (e.code === 'Enter' || e.code === 'NumpadEnter'))) selConfirm(me);
+  else if (two && ['Comma', 'Numpad1', 'Digit7', 'Enter', 'NumpadEnter'].includes(e.code)) selConfirm(1);
+  else if (e.code === 'KeyK' || e.code === 'Escape' || (!two && e.code === 'Backspace')) selBack(me);
+  else if (two && ['Period', 'Numpad2', 'Digit8', 'Backspace'].includes(e.code)) selBack(1);
+  else if (e.code === 'KeyR') { if (!two && me === 1) SEL.ready[0] = true; selRandom(me); }
+  else if (e.code === 'KeyL' || e.code === 'Slash') toggleMoves();
+  else return;
+  e.preventDefault();
+});
 
 /* end */
 $('#end-again').onclick = () => { audioInit(); showGame(); };

@@ -14,7 +14,12 @@ Open `index.html` in a browser. It needs the `img/` folder next to it.
 - Each fighter has one mechanic only they have (for example parry, freeze, copy, rage form,
   gasoline pools, random gags, swallowing shots, reversed controls, eye drones, demon spawn,
   grabs, and a Red X cannon).
-- 4 colours per fighter: Original, Toxic, Abyss and Tape (the black-and-white World 8 look).
+- Skins come from FAL125: every fighter has its two named FAL125 recolours (for example Radiant's
+  Hazard Yellow and Fallout Pink). Fuja, Radiant, Eyianix, Bearer and Renku also have their drawn
+  FAL125 art skins (Horror Drawing, Scribble Original, Classic, Legendary) in `img/skin_*.webp`.
+- Select screen: fighter art on both sides with name plates, a face grid, a tips bar and a button
+  bar. Keyboard: move the cursor, press confirm to pick, choose a colour left/right, confirm again
+  to lock in. In 2 Players both players pick at the same time.
 - Fuja, Flick, Eyianix and Bearer only have a standing sprite so far. The game leans them forward
   when they attack and flattens them when knocked out. To give them real poses, save
   `img/<key>_atk.webp` and `img/<key>_ko.webp` (keys: fuja, flick, eyianix, bearer); the game
