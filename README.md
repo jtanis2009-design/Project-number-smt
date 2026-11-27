@@ -16,7 +16,11 @@ Open `index.html` in a browser. It needs the `img/` folder next to it.
   grabs, and a Red X cannon).
 - Skins come from FAL125: every fighter has its two named FAL125 recolours (for example Radiant's
   Hazard Yellow and Fallout Pink). Fuja, Radiant, Eyianix, Bearer and Renku also have their drawn
-  FAL125 art skins (Horror Drawing, Scribble Original, Classic, Legendary) in `img/skin_*.webp`.
+  FAL125 art skins (Horror Drawing, Scribble Original, Classic) in `img/skin_*.webp`.
+- 10 stages, one for each FAL125 world: Containment Hall B, The Showroom (Experimental Ringer),
+  Sewer Network, The Perimeter Fence (Beyond the Facility), The Safe Haven, Something Isn't Right,
+  The Altar (The Cult), The Tape (The Climax), The Big Top (Clown's Massacre) and The Casino Floor.
+  Pick one on the select screen (Q / E or the arrows), or leave it on Random.
 - Select screen: fighter art on both sides with name plates, a face grid, a tips bar and a button
   bar. Keyboard: move the cursor, press confirm to pick, choose a colour left/right, confirm again
   to lock in. In 2 Players both players pick at the same time.
