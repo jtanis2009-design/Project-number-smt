@@ -1661,6 +1661,54 @@ const ROSTER = {
       super: 'Never Stops: an armoured walk that drags the enemy along with it and tears at them, then one last big hit.'
     }
   }
+,
+  clownx25: {
+    name: 'Clown.x25', id: '0096', type: 'Human', ability: 'Two to One', color: '#f06a6a',
+    style: 'Two lives', stats: { hp: 2, pow: 4, spd: 3 },
+    blurb: "The armored half and the doll from Clown's Massacre, fused for good. A short health bar, but knock him out and he splits into his two mini forms and keeps fighting.",
+    hp: 720, splitHp: 480, walk: 4.6, jumpV: 17, drawH: 236, bw: 88, bh: 205, reach: 150, splitImg: true,
+    meter: { name: 'HANDS', max: 5, pips: true },
+    dmgMul: f => 1 + 0.05 * f.meterV,
+    onDeal(f) { if (!f.split) f.meterV = Math.min(5, f.meterV + 1); },
+    passive(f) { if (f.split && f.hp > f.d.splitHp) f.hp = f.d.splitHp; if (f.holdHands > 0) f.holdHands--; },
+    reduce(f, dmg) { return f.holdHands > 0 ? Math.round(dmg * 0.7) : dmg; },
+    armor: f => f.holdHands > 0,
+    aiFar(f) { return f.split && f.cd === 0 && Math.random() < 0.4 ? 'special' : null; },
+    moves: {
+      light: { name: 'Stitch Jab', s: 5, a: 4, r: 10, x: 15, y: -180, w: 130, h: 95, dmg: 46, stun: 17, kb: 5,
+        pick: f => f.split ? ROSTER.clownx25.splitMoves.light : null },
+      heavy: { name: 'Iron Fist', s: 13, a: 5, r: 19, x: 10, y: -195, w: 150, h: 120, dmg: 86, stun: 24, kb: 12, heavy: true,
+        pick: f => f.split ? ROSTER.clownx25.splitMoves.heavy : null },
+      special: { name: 'Hold Hands', s: 6, a: 0, r: 10, cd: 150, special: true,
+        pick: f => f.split ? ROSTER.clownx25.splitMoves.special : null,
+        frame(f, o, a) { if (a.t === 6) { f.holdHands = 90; f.meterV = Math.min(5, f.meterV + 1); pop(f, 'HOLD HANDS', '#f06a6a'); sfx('charge'); } } },
+      super: { name: 'Two Become One', s: 18, a: 1, r: 26, super: true, unblock: true,
+        frame(f, o, a) {
+          if (a.t !== 18) return;
+          if (f.split) { f.split = false; f.hp = Math.round(f.d.hp * 0.5); pop(f, 'TWO BECOME ONE', '#f06a6a'); burst(f.x, f.y - 120, '#f06a6a', 26); }
+          G.waves.push({ x: f.x, t: 10, c: '240,106,106' }); shake(16); sfx('boom');
+          if (o.state !== 'ko' && Math.abs(o.x - f.x) < 260 && Math.abs(o.y - f.y) < 220) landHit(f, o, { dmg: 120 + 20 * f.meterV, stun: 36, kb: 15, launch: 10, unblock: true, super: true });
+          f.meterV = 0;
+        } }
+    },
+    splitMoves: {
+      light: { name: 'Armour Jab + Doll Bite', s: 4, a: 9, r: 8, hold: true, x: 15, y: -160, w: 130, h: 95,
+        frame(f, o, a) {
+          if ((a.t === 5 || a.t === 11) && o.state !== 'ko' && overlap(hitbox(f, a.m), o.box())) { if (landHit(f, o, { dmg: a.t === 5 ? 26 : 22, stun: 16, kb: a.t === 11 ? 5 : 1 })) a.hit = true; }
+          if (a.t === 5 || a.t === 11) sfx('whoosh');
+          if (a.t >= 20) f.atk = null;
+        } },
+      heavy: { name: 'Iron Fist', s: 11, a: 5, r: 18, x: 10, y: -170, w: 145, h: 110, dmg: 72, stun: 22, kb: 11, heavy: true },
+      special: { name: 'Doll Toss', s: 10, a: 1, r: 18, cd: 70, special: true,
+        frame(f, o, a) { if (a.t === 10) { shoot(f, { dmg: 48, r: 26, vx: 13, y: -100, color: '#f4ece6', kind: 'x25doll', boomer: 30, life: 300 }); f.dollOut = true; sfx('whoosh'); } } }
+    },
+    moveText: {
+      passive: ['Two to One', 'A short health bar. The first knockout each round splits him into his two mini forms (the armour and the doll) with a new health bar. Beat both to win the round. HANDS: every hit adds one (max 5), +5% damage each.'],
+      light: 'Stitch Jab. Split: the armour jabs and the doll bites right after.', heavy: 'Iron Fist: the armoured fist.',
+      special: 'Hold Hands: for 1.5 seconds nothing stops him and he takes 30% less damage. Split: Doll Toss throws the doll at the enemy and it runs back.',
+      super: 'Two Become One: a huge two-handed slam. If he is split, the two forms fuse back together first (half health back).'
+    }
+  }
 
 };
 const GAGS = ['Banana Peel', 'Cream Pie', 'Boxing Glove', 'Bomb', 'Anvil Drop'];
@@ -1674,6 +1722,7 @@ function loadImages() {
     IMG[k] = {};
     const poses = [['idle', ''], ['atk', '_atk'], ['ko', '_ko']];
     if (ROSTER[k].rageImg) poses.push(['rage', '_rage']);
+    if (ROSTER[k].splitImg) poses.push(['splitA', '_splita'], ['splitB', '_splitb']);
     for (const [slot, suf] of poses) {
       const im = new Image(); im.decoding = 'async'; im.src = `img/${k}${suf}.webp`;
       IMG[k][slot] = im;
@@ -1877,6 +1926,7 @@ class Fighter {
     this.evil = 0; this.copying = false; this.inPool = null; this.lookAway = false;
     this.swallow = 0; this.reversed = 0; this.mirror = 0; this.spotted = 0; this.eyes = null; this.eyeT = 0;
     this.grey = 0; this.dolled = 0; this.webbed = 0; this.puppet = 0; this.puppeteer = null; this.tether = 0; this.tetherTo = null; this.lag = 0; this.lagState = null;
+    this.split = false; this.splitUsed = false; this.holdHands = 0; this.dollOut = false;
     this.breach = 0; this.seamed = 0; this.parka = 0; this.stepT = 0;
     this.flip = 0; this.flipStore = 0; this.flipWas = false; this.takenRound = 0; this.heard = 0;
     this.asleep = 0; this.drowsy = 0; this.spiral = 0; this.spiralUsed = false; this.hidden = false; this.calm = false; this.curInp = null;
@@ -1941,6 +1991,11 @@ function runMove(f, o) {
 function applyDmg(d, dmg) {
   d.takenRound = (d.takenRound || 0) + dmg;
   d.hp = Math.max(0, d.hp - dmg);
+  if (d.hp <= 0 && d.d.splitHp && !d.split && !d.splitUsed) {
+    d.split = true; d.splitUsed = true; d.hp = d.d.splitHp; d.shown = d.hp; d.inv = 50; d.atk = null; d.meterV = 0;
+    pop(d, 'SPLIT!', '#f06a6a'); burst(d.x, d.y - 120, '#f06a6a', 30); burst(d.x, d.y - 120, '#f4ece6', 20); shake(14); sfx('boom'); G.stop = Math.max(G.stop, 14);
+    return;
+  }
   if (d.hp <= 0 && d.d.cheat && !d.usedCheat) { d.usedCheat = true; d.hp = 1; d.flat = 60; pop(d, 'FLATTENED!', '#b49af0'); sfx('jump'); }
 }
 function afterDeal(a, dmg) {
@@ -2056,7 +2111,7 @@ function updateProjs() {
       if (p.back) {
         p.vx = clamp(p.vx + Math.sign(ow.x - p.x) * 1.4, -17, 17);
         p.y += ((ow.y - 140) - p.y) * 0.12;
-        if (Math.abs(ow.x - p.x) < 50 && Math.abs(ow.y - 140 - p.y) < 80) { p.life = 0; continue; }
+        if (Math.abs(ow.x - p.x) < 50 && Math.abs(ow.y - 140 - p.y) < 80) { p.life = 0; if (p.kind === 'x25doll') ow.dollOut = false; continue; }
         if (ow.state === 'ko') p.life = 0;
       }
     }
@@ -2935,8 +2990,14 @@ function drawFighter(f) {
   if (!o.tint && f.spiral > 0) o.tint = ['#aab2f0', 0.25 + 0.15 * Math.sin(t * 0.6)];
   if (f.lag > 0 && G.frame % 6 < 2) { o.ox = (o.ox || 0) + rand(-8, 8); if (!o.tint) o.tint = ['#ff3b3b', 0.35]; }
   if (f.hidden) return;
+  if (f.split && im.splitA && iw(im.splitA)) {
+    const B = im.splitB;
+    if (!f.dollOut && B && iw(B)) drawSprite(B, f.x - f.face * 70 + Math.sin(t * 0.2) * 3, f.y - Math.abs(Math.sin(t * 0.18)) * 6, f.d.drawH * 0.62, face, { baseH: ih(B), alpha: o.alpha, tint: o.tint, ox: f.atk ? f.face * 40 : 0 });
+    img = im.splitA; o.baseH = ih(im.splitA); f._dh = f.d.drawH * 0.78;
+  } else f._dh = 0;
   if (f.flip > 0) { const k = 'flick:inv'; if (!SKIN_CACHE[k]) { const ops = filterOps('invert(1)'); SKIN_CACHE[k] = {}; for (const sl in IMG[f.key]) SKIN_CACHE[k][sl] = recolor(IMG[f.key][sl], ops); } const inv = SKIN_CACHE[k]; img = img === im.atk ? inv.atk : img === im.ko ? inv.ko : inv.idle; o.alpha = 0.2 + 0.06 * Math.sin(t * 0.3); o.tint = null; }
-  drawSprite(img, f.x, f.y, f.d.drawH, face, o);
+  if (f.holdHands > 0 && !o.tint) o.tint = ['#f06a6a', 0.25 + 0.1 * Math.sin(t * 0.5)];
+  drawSprite(img, f.x, f.y, f._dh || f.d.drawH, face, o);
   if (f.key === 'eyianix' && f.state !== 'ko') for (let i = 0; i < (f.eyes || 0); i++) {
     const e = eyePos(f, i, 3);
     cx.fillStyle = '#f4f8f8'; cx.beginPath(); cx.ellipse(e.x, e.y, 13, 9, 0, 0, 7); cx.fill(); cx.strokeStyle = '#123'; cx.lineWidth = 2; cx.stroke();
@@ -2988,9 +3049,9 @@ function drawHUD() {
     const left = f.side === 0, x0 = left ? 40 : W - 40 - 500, w = 500, y0 = 26, h = 28;
     cx.fillStyle = 'rgba(0,0,0,.6)'; cx.fillRect(x0 - 4, y0 - 4, w + 8, h + 8);
     cx.fillStyle = '#3a1416'; cx.fillRect(x0, y0, w, h);
-    const sw = w * clamp(f.shown / f.d.hp, 0, 1), hw = w * clamp(f.hp / f.d.hp, 0, 1);
+    const mx = f.split ? f.d.splitHp : f.d.hp, sw = w * clamp(f.shown / mx, 0, 1), hw = w * clamp(f.hp / mx, 0, 1);
     cx.fillStyle = '#f4f1e8'; cx.fillRect(left ? x0 + w - sw : x0, y0, sw, h);
-    const pct = f.hp / f.d.hp;
+    const pct = f.hp / (f.split ? f.d.splitHp : f.d.hp);
     cx.fillStyle = pct > 0.5 ? '#f2b705' : pct > 0.25 ? '#ff8a2a' : '#e0343c';
     cx.fillRect(left ? x0 + w - hw : x0, y0, hw, h);
     cx.fillStyle = 'rgba(255,255,255,.18)'; cx.fillRect(left ? x0 + w - hw : x0, y0, hw, 6);
@@ -3156,6 +3217,7 @@ function draw() {
     if (p.kind === 'anvil') { cx.fillStyle = '#6a7078'; cx.strokeStyle = '#2a2e33'; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(p.x - 50, p.y - 30); cx.lineTo(p.x + 50, p.y - 30); cx.lineTo(p.x + 30, p.y); cx.lineTo(p.x + 22, p.y + 30); cx.lineTo(p.x - 22, p.y + 30); cx.lineTo(p.x - 30, p.y); cx.closePath(); cx.fill(); cx.stroke(); txt('100T', p.x, p.y - 12, 16, '#e8ecea', 'center', 'body', false); continue; }
     if (p.kind === 'ball') { cx.fillStyle = '#1b1b1d'; cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 7); cx.fill(); cx.fillStyle = 'rgba(255,255,255,.25)'; cx.beginPath(); cx.arc(p.x - 7, p.y - 7, 7, 0, 7); cx.fill(); continue; }
     if (p.kind === 'eye') { cx.fillStyle = '#f4f8f8'; cx.beginPath(); cx.ellipse(p.x, p.y, p.r, p.r * 0.7, 0, 0, 7); cx.fill(); cx.fillStyle = '#2fc7d4'; cx.beginPath(); cx.arc(p.x + Math.sign(p.vx) * 3, p.y, p.r * 0.4, 0, 7); cx.fill(); continue; }
+    if (p.kind === 'x25doll') { const im = IMG.clownx25 && IMG.clownx25.splitB; if (im && iw(im)) drawSprite(im, p.x, p.y + 60, 110, Math.sign(p.vx) || 1, { baseH: ih(im), rot: p.age * 0.3 }); continue; }
     if (p.kind === 'heart') { txt('♥', p.x, p.y, p.r * 2.4, '#ff5a8a', 'center', 'body'); continue; }
     if (p.kind === 'doll') { cx.fillStyle = '#e0a070'; cx.beginPath(); cx.arc(p.x, p.y - 8, 9, 0, 7); cx.fill(); cx.fillRect(p.x - 7, p.y, 14, 16); cx.strokeStyle = '#a77ae8'; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(p.x - 14, p.y - 14); cx.lineTo(p.x + 14, p.y + 10); cx.stroke(); continue; }
     if (p.kind === 'web') { cx.strokeStyle = '#c22a4a'; cx.lineWidth = 2; for (let i = 0; i < 4; i++) { const an = i * Math.PI / 4 + p.age * 0.1; cx.beginPath(); cx.moveTo(p.x + Math.cos(an) * p.r, p.y + Math.sin(an) * p.r); cx.lineTo(p.x - Math.cos(an) * p.r, p.y - Math.sin(an) * p.r); cx.stroke(); } cx.beginPath(); cx.arc(p.x, p.y, p.r * 0.6, 0, 7); cx.stroke(); continue; }
@@ -3327,6 +3389,9 @@ function openSelect() {
 }
 function buildIcons() {
   $('#icons').innerHTML = KEYS.map((k, i) => `<button class="ico${ROSTER[k].faceLeft ? ' flipx' : ''}" data-i="${i}" data-id="${ROSTER[k].id}" style="--c:${ROSTER[k].color}" aria-label="${ROSTER[k].name}"><img src="img/${k}.webp" alt="" draggable="false"><span class="tg"></span></button>`).join('');
+  const cols = Math.max(10, Math.ceil(KEYS.length / 3)), rows = Math.ceil(KEYS.length / cols), ic = $('#icons');
+  if (innerWidth > 760) { ic.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`; ic.style.setProperty('max-width', `min(${88 * cols}px, calc((100vh - 430px) * ${(0.29 * cols * 3 / rows).toFixed(2)}))`, 'important'); }
+  else { ic.style.gridTemplateColumns = ''; ic.style.removeProperty('max-width'); }
   for (const b of document.querySelectorAll('.ico')) {
     const i = +b.dataset.i;
     b.onclick = () => selPointer(i);

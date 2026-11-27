@@ -7,7 +7,8 @@ names, move names and sprites all come from the FAL125 Character Book.
 Open `index.html` in a browser. It needs the `img/` folder next to it.
 
 ## Version 5
-- 30 fighters in 3 rows: Rainbow Ripper, Gloom, Dollion, Vein Ripper, Stitchheart, Glitch, Hush,
+- 31 fighters in 3 rows of 11. Clown.x25 has a short health bar and splits into his two mini
+  forms (the armour and the doll) on his first knockout each round. Also: Rainbow Ripper, Gloom, Dollion, Vein Ripper, Stitchheart, Glitch, Hush,
   Serpentine, Sunburst and Walker joined (Furnace and The Painter were swapped out; their code is
   in the git history). Flick was reworked from the author's sheet (Flipside stores and transfers
   damage, Look Inside stuns) and uses its new FAL125 sprites (V307).
