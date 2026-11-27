@@ -1107,32 +1107,53 @@ const ROSTER = {
   },
   flick: {
     name: 'Flick', id: '0019', type: 'Anomaly', ability: 'Flipside', color: '#e8b86a',
-    style: 'Trickster', stats: { hp: 4, pow: 2, spd: 3 },
-    blurb: 'From the old universe. Flick lives on the Flipside: it turns your controls around, throws you to the wrong side, and turns your damage back on you.',
-    hp: 1220, walk: 4.4, jumpV: 16, drawH: 170, bw: 120, bh: 150, reach: 160, meter: null,
-    aiFar(f, o) { return !(o.reversed > 0) && Math.random() < 0.3 ? 'special' : null; },
+    style: 'Transfer', stats: { hp: 4, pow: 3, spd: 3 },
+    blurb: 'Its lower half was cut off when it was young, and it is blind: it goes off the sounds it hears. On the Flipside its body inverts, no eye can see it, and the damage you deal it is transferred back onto you. Do not look into its mouth.',
+    hp: 1120, walk: 4.4, jumpV: 16, drawH: 170, bw: 120, bh: 150, reach: 160, meter: { name: 'STORED', max: 200 },
+    passive(f, o) {
+      if (o.atk && o.atk.t === 1 && f.grounded && !f.atk && f.hitstun <= 0) { f.face = Math.sign(o.x - f.x) || f.face; f.heard = 30; }
+      if (f.heard > 0) f.heard--;
+      f.meterV = Math.min(200, f.flipStore || 0);
+      if (f.flipWas && !(f.flip > 0)) flickTransfer(f, o);
+      f.flipWas = f.flip > 0;
+    },
+    onDeal(f, d, dmg, m) { if (f.flip > 0 && !m.transfer) { f.flip = 0; flickTransfer(f, d); } },
+    aiFar(f, o) { return f.cd === 0 && Math.abs(o.x - f.x) < 400 && Math.random() < 0.3 ? 'special' : null; },
     moves: {
-      light: { name: 'Snap Bite', s: 5, a: 4, r: 10, x: 20, y: -140, w: 130, h: 90, dmg: 46, stun: 17, kb: 5 },
-      heavy: { name: 'Flipside', s: 12, a: 6, r: 18, x: 10, y: -160, w: 150, h: 120, dmg: 70, stun: 26, kb: 2, heavy: true,
-        onHit(f, o) { o.x = clamp(f.x - (o.x - f.x), LEFT + o.d.bw / 2, RIGHT - o.d.bw / 2); o.vy = -9; pop(o, 'FLIPPED', '#e8b86a'); } },
-      special: { name: 'Reversal', s: 10, a: 0, r: 16, cd: 120, special: true,
+      light: { name: 'Claw Drag', s: 5, a: 4, r: 10, x: 20, y: -140, w: 135, h: 90, dmg: 46, stun: 17, kb: 5 },
+      heavy: { name: 'Look Inside', s: 12, a: 1, r: 22, heavy: true,
+        cond: f => !(f.lookCd > G.frame),
+        alt: { name: 'Maw Snap', s: 11, a: 5, r: 18, x: 15, y: -150, w: 140, h: 100, dmg: 72, stun: 22, kb: 9, heavy: true },
         frame(f, o, a) {
-          if (a.t === 10) {
-            ring(f.x, f.y - 80, 300, '#e8b86a'); sfx('beam');
-            if (o.state !== 'ko' && Math.abs(o.x - f.x) < 300 && Math.abs(o.y - f.y) < 260) {
-              const r = landHit(f, o, { dmg: 20, stun: 12, kb: 3, unblock: true, special: true });
-              if (r && r !== 'parry') { o.reversed = 240; pop(o, 'CONTROLS REVERSED', '#e8b86a'); }
+          if (a.t === 12) {
+            f.lookCd = G.frame + 240;
+            G.fx.push({ type: 'maw', x: f.x + f.face * 50, y: f.y - 90, t: 22, max: 22 }); sfx('charge');
+            const looking = o.face === (Math.sign(f.x - o.x) || o.face);
+            if (o.state !== 'ko' && Math.abs(o.x - f.x) < 210 && Math.abs(o.y - f.y) < 200) {
+              if (looking && o.isBlocking()) pop(o, 'EYES COVERED', '#93a19e');
+              else if (looking && !(o.lookImm > G.frame)) { const r = landHit(f, o, { dmg: 24, stun: 32, kb: 0, heavy: true, unblock: true }); if (r && r !== 'parry') { o.lookImm = G.frame + 240; pop(o, 'STUNNED', '#e8b86a'); } }
+              else if (looking) pop(o, 'RESISTED', '#93a19e');
+              else pop(o, 'LOOKED AWAY', '#93a19e');
             }
           }
         } },
-      super: { name: 'Total Reversal', s: 10, a: 0, r: 8, super: true,
-        frame(f, o, a) { if (a.t === 10) { f.mirror = 180; pop(f, 'TOTAL REVERSAL', '#e8b86a'); G.flash = { c: '#e8b86a', t: 10 }; sfx('super'); } } }
+      special: { name: 'Flipside', s: 8, a: 0, r: 8, cd: 600, special: true,
+        frame(f, o, a) { if (a.t === 8) { f.flip = 180; f.flipStore = 0; pop(f, 'FLIPSIDE', '#e8b86a'); sfx('super'); ring(f.x, f.y - 80, 160, '#e8b86a'); } } },
+      super: { name: 'Transfer', s: 16, a: 1, r: 24, super: true, unblock: true,
+        frame(f, o, a) {
+          if (a.t === 16 && o.state !== 'ko') {
+            const x = Math.round(Math.min(260, Math.max(60, (f.takenRound || 0) * 0.45)));
+            G.fx.push({ type: 'transfer', x0: f.x, y0: f.y - 80, x1: o.x, y1: o.y - 110, t: 26, max: 26 }); sfx('beamBig'); shake(12);
+            f.hp = Math.min(f.d.hp, f.hp + x); pop(f, '+' + x, '#7dff9a');
+            landHit(f, o, { dmg: x, stun: 34, kb: 10, launch: 6, unblock: true, super: true, transfer: true });
+          }
+        } }
     },
     moveText: {
-      passive: ['Flipside', 'A low, wide crawler. Its tricks mess with which way is which.'],
-      light: 'A quick bite.', heavy: 'Throws the enemy over Flick to the other side.',
-      special: 'A pulse around Flick. Anyone caught has left and right swapped for 4 seconds.',
-      super: 'For 3 seconds every hit on Flick heals Flick instead, and the attacker takes half of it.'
+      passive: ['Blind', 'Flick goes off sound: when the enemy starts an attack, it hears them and turns to face them. Its lower half is gone, so it is a low target.'],
+      light: 'Claw Drag: a crawling claw swipe.', heavy: 'Look Inside: opens its mouth. An enemy close by who is facing Flick looks in and is stunned. Facing away or blocking (covering your eyes) is safe. Once every 4 seconds; in between it is a normal bite.',
+      special: 'Flipside (3 seconds, once every 10 seconds): its body inverts and it is almost invisible. Hits on it are stored instead of taken (up to 200). Its next hit, or the end of Flipside, transfers all of it onto the enemy.',
+      super: 'Transfer: takes the damage it has taken this round and moves it onto the enemy. Flick heals that much and the enemy takes it.'
     }
   },
   eyianix: {
@@ -1818,6 +1839,7 @@ class Fighter {
     this.evil = 0; this.copying = false; this.inPool = null; this.lookAway = false;
     this.swallow = 0; this.reversed = 0; this.mirror = 0; this.spotted = 0; this.eyes = null; this.eyeT = 0;
     this.grey = 0; this.dolled = 0; this.webbed = 0; this.puppet = 0; this.puppeteer = null; this.tether = 0; this.tetherTo = null; this.lag = 0; this.lagState = null;
+    this.flip = 0; this.flipStore = 0; this.flipWas = false; this.takenRound = 0; this.heard = 0;
     this.asleep = 0; this.drowsy = 0; this.spiral = 0; this.spiralUsed = false; this.hidden = false; this.calm = false; this.curInp = null;
   }
   get grounded() { return this.y >= GROUND - 0.5 && this.vy >= 0; }
@@ -1878,6 +1900,7 @@ function runMove(f, o) {
 }
 
 function applyDmg(d, dmg) {
+  d.takenRound = (d.takenRound || 0) + dmg;
   d.hp = Math.max(0, d.hp - dmg);
   if (d.hp <= 0 && d.d.cheat && !d.usedCheat) { d.usedCheat = true; d.hp = 1; d.flat = 60; pop(d, 'FLATTENED!', '#b49af0'); sfx('jump'); }
 }
@@ -1931,6 +1954,12 @@ function landHit(a, d, m) {
   if (d.frozen > 0) { dmg *= 1.2; d.frozen = 0; d.lock = 0; pop(d, 'SHATTER', '#bff0ff'); burst(d.x, d.y - 110, '#bff0ff', 20); }
   dmg = Math.round(dmg);
   if (d.d.reduce) dmg = d.d.reduce(d, dmg, m);
+  if (d.flip > 0) {
+    d.flipStore = Math.min(200, (d.flipStore || 0) + dmg); d.flash = 3;
+    burst(hx, hy, '#e8b86a', 8); sfx('block'); G.stop = Math.max(G.stop, 3);
+    if (Math.random() < 0.4) pop(d, 'STORED', '#e8b86a');
+    return 'absorb';
+  }
   if (d.mirror > 0) {
     d.hp = Math.min(d.d.hp, d.hp + dmg); applyDmg(a, Math.round(dmg * 0.5)); a.flash = 5;
     pop(d, '+' + dmg, '#e8b86a'); burst(hx, hy, '#e8b86a', 12); sfx('block'); G.stop = Math.max(G.stop, 5);
@@ -2114,6 +2143,13 @@ function cannonball(f, x, dmg, sup) {
   G.projs.push({ owner: f, x: clamp(x, LEFT + 30, RIGHT - 30), y: -60, vx: 0, vy: 18, grav: 1, r: 24, dmg, kind: 'ball', groundBoom: 110,
     unblock: !!sup, super: !!sup, noContact: true, life: 120, age: 0, hits: 0, hitCd: 0, stun: 30, kb: 10 });
 }
+function flickTransfer(f, o) {
+  const x = Math.round(f.flipStore || 0); f.flipStore = 0; f.flip = 0;
+  if (!x || o.state === 'ko') return;
+  G.fx.push({ type: 'transfer', x0: f.x, y0: f.y - 80, x1: o.x, y1: o.y - 110, t: 24, max: 24 });
+  applyDmg(o, x); o.flash = 6; pop(o, 'TRANSFERRED -' + x, '#e8b86a'); shake(8); sfx('heavy');
+  if (o.hp <= 0) doKO(o, f);
+}
 function drowse(f, o, n) {
   if (o.state === 'ko') return;
   if (o.drowsy > 0) putToSleep(f, o, 150); else { o.drowsy = n; pop(o, 'DROWSY', '#e8dcc0'); }
@@ -2213,7 +2249,7 @@ function updateFighter(f, o) {
     if (f.burn % 30 === 0 && f.state !== 'ko') f.hp = Math.max(1, f.hp - 8);
     if (G.frame % 4 === 0) spark(f.x + rand(-30, 30), f.y - rand(20, f.d.bh), G.frame % 8 ? '#ff8a3a' : '#ffd23a', 4, 20, null, -3);
   }
-  for (const k of ['seal', 'claimed', 'armorT', 'parry', 'parryAuto', 'frozen', 'flat', 'buffNext', 'swallow', 'reversed', 'mirror', 'spotted', 'grey', 'dolled', 'webbed', 'puppet', 'tether', 'lag', 'asleep', 'drowsy']) if (f[k] > 0) f[k]--;
+  for (const k of ['seal', 'claimed', 'armorT', 'parry', 'parryAuto', 'frozen', 'flat', 'buffNext', 'swallow', 'reversed', 'mirror', 'spotted', 'flip', 'grey', 'dolled', 'webbed', 'puppet', 'tether', 'lag', 'asleep', 'drowsy']) if (f[k] > 0) f[k]--;
   if (f.drowsy > 0) f.slow = Math.max(f.slow, 2);
   if (f.rage > 0 && --f.rage === 0) { pop(f, 'MASK ON', '#e04a8a'); f.hitstun = Math.max(f.hitstun, 30); }
   if (f.soak > 0 && !f.inPool && ++f.soakT % 300 === 0) f.soak--;
@@ -2858,6 +2894,7 @@ function drawFighter(f) {
   if (!o.tint && f.spiral > 0) o.tint = ['#aab2f0', 0.25 + 0.15 * Math.sin(t * 0.6)];
   if (f.lag > 0 && G.frame % 6 < 2) { o.ox = (o.ox || 0) + rand(-8, 8); if (!o.tint) o.tint = ['#ff3b3b', 0.35]; }
   if (f.hidden) return;
+  if (f.flip > 0) { const k = 'flick:inv'; if (!SKIN_CACHE[k]) { const ops = filterOps('invert(1)'); SKIN_CACHE[k] = {}; for (const sl in IMG[f.key]) SKIN_CACHE[k][sl] = recolor(IMG[f.key][sl], ops); } const inv = SKIN_CACHE[k]; img = img === im.atk ? inv.atk : img === im.ko ? inv.ko : inv.idle; o.alpha = 0.2 + 0.06 * Math.sin(t * 0.3); o.tint = null; }
   drawSprite(img, f.x, f.y, f.d.drawH, face, o);
   if (f.key === 'eyianix' && f.state !== 'ko') for (let i = 0; i < (f.eyes || 0); i++) {
     const e = eyePos(f, i, 3);
@@ -3023,7 +3060,7 @@ function draw() {
     for (let i = 0; i < wl.hp; i++) { cx.globalAlpha = k; cx.fillStyle = '#fff'; cx.fillRect(wl.x - 10 + i * 8, GROUND - 278, 6, 6); }
     cx.globalAlpha = 1;
   }
-  for (const f of G.p) { if (f.hidden) continue; const s = clamp(1 - (GROUND - f.y) / 400, 0.3, 1); cx.fillStyle = 'rgba(0,0,0,.45)'; cx.beginPath(); cx.ellipse(f.x, GROUND + 4, f.d.bw * 0.8 * s, 12 * s, 0, 0, 7); cx.fill(); }
+  for (const f of G.p) { if (f.hidden || f.flip > 0) continue; const s = clamp(1 - (GROUND - f.y) / 400, 0.3, 1); cx.fillStyle = 'rgba(0,0,0,.45)'; cx.beginPath(); cx.ellipse(f.x, GROUND + 4, f.d.bw * 0.8 * s, 12 * s, 0, 0, 7); cx.fill(); }
   for (const f of G.p) drawAura(f);
   // afterimages
   for (const a of G.after) { const f = G.p.find(p => p.key === a.k); drawSprite(IMG[a.k][a.img], a.x, a.y, f ? f.d.drawH : 230, a.face, { baseH: ih(IMG[a.k].idle), alpha: a.life / 30, tint: [ROSTER[a.k].color, 0.6] }); }
@@ -3103,6 +3140,13 @@ function draw() {
       gr.addColorStop(0, 'rgba(0,0,0,1)'); gr.addColorStop(0.6, 'rgba(60,30,140,.6)'); gr.addColorStop(1, 'rgba(60,30,140,0)');
       cx.fillStyle = gr; cx.beginPath(); cx.arc(e.x, e.y, r * 1.5, 0, 7); cx.fill();
       if (G.frame % 2 === 0) spark(e.x + rand(-260, 260), e.y + rand(-200, 200), '#8a6cff', 3, 16, e.x);
+    } else if (e.type === 'maw') {
+      cx.globalAlpha = k; cx.fillStyle = '#000'; cx.beginPath(); cx.ellipse(e.x, e.y, 30 + (1 - k) * 40, 22 + (1 - k) * 30, 0, 0, 7); cx.fill();
+      cx.strokeStyle = '#e8b86a'; cx.lineWidth = 3; for (let i = 0; i < 3; i++) { cx.beginPath(); cx.ellipse(e.x, e.y, 40 + i * 40 * (1 - k), 30 + i * 30 * (1 - k), 0, 0, 7); cx.stroke(); } cx.globalAlpha = 1;
+    } else if (e.type === 'transfer') {
+      const q = 1 - k, xx = e.x0 + (e.x1 - e.x0) * q, yy = e.y0 + (e.y1 - e.y0) * q;
+      cx.strokeStyle = `rgba(232,184,106,${k})`; cx.lineWidth = 4; cx.beginPath(); cx.moveTo(e.x0, e.y0); cx.lineTo(xx, yy); cx.stroke();
+      cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(xx, yy, 10, 0, 7); cx.fill();
     } else if (e.type === 'spectrum') {
       const cols = ['#ff3b3b', '#ff9a3b', '#ffe03b', '#4cff63', '#3bc8ff', '#8a5aff'], x1 = e.dir > 0 ? W : 0;
       cols.forEach((c, i) => { cx.globalAlpha = k; cx.fillStyle = c; cx.fillRect(Math.min(e.x, x1), e.y - 60 + i * 20, Math.abs(x1 - e.x), 20); }); cx.globalAlpha = 1;
