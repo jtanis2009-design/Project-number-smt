@@ -6,23 +6,21 @@ names, move names and sprites all come from the FAL125 Character Book.
 
 Open `index.html` in a browser. It needs the `img/` folder next to it.
 
-## Version 4
-- 20 fighters (a 5 by 4 select screen): Radiant, Fuja, Eyianix and Bearer (the story's main four),
-  Chaser, Ixis, Soundemon, The Red Walker, Hemo, Renku, Parda, Weeping Angel, Glacier, Copyright,
-  Lycion, Tomb, Toon, Flick, Uquna and Marrowline. Doommaster and Unbreakable were swapped out
-  for Fuja and Flick (their code is still in the git history).
+## Version 5
+- 30 fighters in 3 rows. New in this version: Rainbow Ripper, Gloom, Dollion, Vein Ripper,
+  Stitchheart, Glitch, Hush, The Painter, Serpentine and Furnace.
 - Each fighter has one mechanic only they have (for example parry, freeze, copy, rage form,
   gasoline pools, random gags, swallowing shots, reversed controls, eye drones, demon spawn,
   grabs, and a Red X cannon).
 - Skins come from FAL125: every fighter has its two named FAL125 recolours (for example Radiant's
   Hazard Yellow and Fallout Pink). Fuja, Radiant, Eyianix, Bearer and Renku also have their drawn
   FAL125 art skins (Horror Drawing, Scribble Original, Classic) in `img/skin_*.webp`.
-- 10 stages, one for each FAL125 world: Containment Hall B, The Showroom (Experimental Ringer),
+- 11 stages, one for each FAL125 world (The Broadcast is Freedom at a Price): Containment Hall B, The Showroom (Experimental Ringer),
   Sewer Network, The Perimeter Fence (Beyond the Facility), The Safe Haven, Something Isn't Right,
   The Altar (The Cult), The Tape (The Climax), The Big Top (Clown's Massacre) and The Casino Floor.
   Pick one on the select screen (Q / E or the arrows), or leave it on Random.
-- Select screen: fighter art on both sides with name plates, a face grid, a tips bar and a button
-  bar. Keyboard: move the cursor, press confirm to pick, choose a colour left/right, confirm again
+- Select screen in a FAL125 containment-terminal style: subject cells, ID numbers, hazard tape,
+  a CLEARED stamp and a facility log. Keyboard: move the cursor, press confirm to pick, choose a colour left/right, confirm again
   to lock in. In 2 Players both players pick at the same time.
 - Fuja, Flick, Eyianix and Bearer only have a standing sprite so far. The game leans them forward
   when they attack and flattens them when knocked out. To give them real poses, save
