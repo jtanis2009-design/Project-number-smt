@@ -7,8 +7,10 @@ names, move names and sprites all come from the FAL125 Character Book.
 Open `index.html` in a browser. It needs the `img/` folder next to it.
 
 ## Version 5
-- 30 fighters in 3 rows. New in this version: Rainbow Ripper, Gloom, Dollion, Vein Ripper,
-  Stitchheart, Glitch, Hush, The Painter, Serpentine and Furnace.
+- 30 fighters in 3 rows: Rainbow Ripper, Gloom, Dollion, Vein Ripper, Stitchheart, Glitch, Hush,
+  Serpentine, Sunburst and Walker joined (Furnace and The Painter were swapped out; their code is
+  in the git history). Flick was reworked from the author's sheet (Flipside stores and transfers
+  damage, Look Inside stuns) and uses its new FAL125 sprites (V307).
 - Each fighter has one mechanic only they have (for example parry, freeze, copy, rage form,
   gasoline pools, random gags, swallowing shots, reversed controls, eye drones, demon spawn,
   grabs, and a Red X cannon).

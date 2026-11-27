@@ -1109,7 +1109,7 @@ const ROSTER = {
     name: 'Flick', id: '0019', type: 'Anomaly', ability: 'Flipside', color: '#e8b86a',
     style: 'Transfer', stats: { hp: 4, pow: 3, spd: 3 },
     blurb: 'Its lower half was cut off when it was young, and it is blind: it goes off the sounds it hears. On the Flipside its body inverts, no eye can see it, and the damage you deal it is transferred back onto you. Do not look into its mouth.',
-    hp: 1120, walk: 4.4, jumpV: 16, drawH: 170, bw: 120, bh: 150, reach: 160, meter: { name: 'STORED', max: 200 },
+    hp: 1120, walk: 4.4, jumpV: 16, drawH: 190, bw: 130, bh: 155, reach: 160, meter: { name: 'STORED', max: 200 },
     passive(f, o) {
       if (o.atk && o.atk.t === 1 && f.grounded && !f.atk && f.hitstun <= 0) { f.face = Math.sign(o.x - f.x) || f.face; f.heard = 30; }
       if (f.heard > 0) f.heard--;
@@ -1127,7 +1127,7 @@ const ROSTER = {
         frame(f, o, a) {
           if (a.t === 12) {
             f.lookCd = G.frame + 240;
-            G.fx.push({ type: 'maw', x: f.x + f.face * 50, y: f.y - 90, t: 22, max: 22 }); sfx('charge');
+            G.fx.push({ type: 'maw', x: f.x + f.face * 40, y: f.y - 160, t: 22, max: 22 }); sfx('charge');
             const looking = o.face === (Math.sign(f.x - o.x) || o.face);
             if (o.state !== 'ko' && Math.abs(o.x - f.x) < 210 && Math.abs(o.y - f.y) < 200) {
               if (looking && o.isBlocking()) pop(o, 'EYES COVERED', '#93a19e');
@@ -1409,7 +1409,7 @@ const ROSTER = {
     style: 'Puppeteer', stats: { hp: 4, pow: 3, spd: 3 },
     blurb: 'Obsessed with veins, human or animal. Insane, but extremely smart (173 IQ). It webs you down, rips your veins, and then controls you with them. Weak to fire and cold.',
     hp: 1230, walk: 4.6, jumpV: 17, drawH: 232, bw: 88, bh: 200, reach: 150, meter: null,
-    reduce(f, dmg, m) { const a = G.p[f.side ^ 1]; return ['tomb', 'furnace', 'glacier'].includes(a.key) ? Math.round(dmg * 1.2) : dmg; },
+    reduce(f, dmg, m) { const a = G.p[f.side ^ 1]; return ['tomb', 'sunburst', 'glacier'].includes(a.key) ? Math.round(dmg * 1.2) : dmg; },
     aiFar(f, o) { return !(o.webbed > 0) && Math.random() < 0.35 ? 'special' : null; },
     moves: {
       light: { name: 'Twitch Claw', s: 5, a: 4, r: 10, x: 15, y: -175, w: 130, h: 95, dmg: 44, stun: 17, kb: 5 },
@@ -1423,7 +1423,7 @@ const ROSTER = {
         } }
     },
     moveText: {
-      passive: ['Veins', 'Weak to fire and cold: Tomb, Furnace and Glacier do 20% more damage to it.'],
+      passive: ['Veins', 'Weak to fire and cold: Tomb, Sunburst and Glacier do 20% more damage to it.'],
       light: 'A twitching claw.', heavy: 'Vein Rip: steals health (more from a Webbed enemy).',
       special: 'Vein Web: a web shot. A Webbed enemy is Slowed and can not jump for 3 seconds.',
       super: 'Vein Control: for 3 seconds the enemy can not attack or block, and walks towards Vein Ripper.'
@@ -1524,35 +1524,6 @@ const ROSTER = {
       super: 'Shriek: a scream that hits anywhere on the screen and heals Hush 15%.'
     }
   },
-  painter: {
-    name: 'The Painter', id: '0128', type: 'Human', ability: "Painter's Dream", color: '#c47ae8',
-    style: 'Builder', stats: { hp: 3, pow: 2, spd: 3 },
-    blurb: 'One of a thousand painters, covered in paint (or blood). If he paints something, it comes true: a wall, a cure, a monster.',
-    hp: 1120, walk: 4.7, jumpV: 17.5, drawH: 226, bw: 80, bh: 196, reach: 150, meter: null,
-    aiFar(f) { return !G.walls.some(w => w.owner === f) && Math.random() < 0.4 ? 'special' : null; },
-    moves: {
-      light: { name: 'Brush Flick', s: 5, a: 4, r: 10, x: 15, y: -170, w: 140, h: 90, dmg: 48, stun: 17, kb: 5 },
-      heavy: { name: 'Paint Over', s: 12, a: 6, r: 18, x: 5, y: -190, w: 150, h: 120, dmg: 80, stun: 23, kb: 9, heavy: true,
-        onHit(f) { const h = Math.round(f.d.hp * 0.08); f.hp = Math.min(f.d.hp, f.hp + h); for (const k of ['slow', 'burn', 'bleed', 'grey', 'webbed', 'lag', 'dolled']) f[k] = 0; pop(f, '+' + h, '#7dff9a'); } },
-      special: { name: 'Paint a Wall', s: 12, a: 0, r: 14, cd: 90, special: true,
-        frame(f, o, a) { if (a.t === 12) { for (const w of G.walls) if (w.owner === f) w.t = 0; const wx = clamp(f.x + f.face * 150, LEFT + 30, RIGHT - 30); G.walls.push({ owner: f, x: wx, t: 420, max: 420, hp: 3 }); sfx('charge');
-          if (o.state !== 'ko' && Math.abs(o.x - wx) < o.d.bw / 2 + 20 && o.grounded) landHit(f, o, { dmg: 45, stun: 24, kb: 14, special: true }); } } },
-      super: { name: 'Masterpiece', s: 18, a: 1, r: 26, super: true, unblock: true,
-        frame(f, o, a) {
-          if (a.t === 18) {
-            G.fx.push({ type: 'stroke', x: f.x, y: GROUND - 90, dir: f.face, t: 26, max: 26 }); sfx('beamBig'); shake(10);
-            if (o.state !== 'ko' && o.grounded && Math.sign(o.x - f.x) === f.face) { landHit(f, o, { dmg: 180, stun: 36, kb: 12, launch: 8, unblock: true, super: true }); o.slow = 200; pop(o, 'PAINTED', '#c47ae8'); }
-            else if (o.state !== 'ko') pop(o, 'DODGED', '#e8ecea');
-          }
-        } }
-    },
-    moveText: {
-      passive: ["Painter's Dream", 'What he paints comes true. His wall stops the enemy and their shots (3 hits break it). He walks through his own paint.'],
-      light: 'A flick of the brush.', heavy: 'Paint Over: heals him 8% and paints away his bad effects (Slow, burning, bleeding and more).',
-      special: 'Paint a Wall: a wall in front of him for 7 seconds. If the enemy is standing where it appears, it knocks them away.',
-      super: 'Masterpiece: one huge brush stroke along the floor. Jump to dodge.'
-    }
-  },
   serpentine: {
     name: 'Serpentine', id: '0022', type: 'Cosmic', ability: 'Drop of Sand', color: '#e8dcc0',
     style: 'Sleeper', stats: { hp: 3, pow: 2, spd: 3 },
@@ -1581,49 +1552,113 @@ const ROSTER = {
       super: 'Waking Dream: a sandstorm that puts the enemy to sleep anywhere and heals Serpentine 20%.'
     }
   },
-  furnace: {
-    name: 'Furnace', id: '0132', type: 'Human', ability: 'Blast Furnace', color: '#ff6a3a',
-    style: 'Overheater', stats: { hp: 3, pow: 5, spd: 2 },
-    blurb: 'Its chest creates a burst of fire that blasts through everything 5 km in front of it. The fire ripped off all its skin. Every attack heats it up; push too far and it overheats.',
-    hp: 1220, walk: 4.3, jumpV: 16.5, drawH: 234, bw: 90, bh: 205, reach: 150,
-    meter: { name: 'HEAT', max: 100 },
+  sunburst: {
+    name: 'Sunburst', id: '0064', type: 'Demon', ability: 'Flaming Core', color: '#ff8a1c',
+    style: 'Breacher', stats: { hp: 3, pow: 5, spd: 3 },
+    blurb: 'A many-eyed monster with a flaming head and long claws. His containment suit is built to hold the fire inside. Tear it open and the flames pour out.',
+    hp: 1240, walk: 4.8, jumpV: 17, drawH: 232, bw: 84, bh: 200, reach: 150,
+    meter: { name: 'SUIT', max: 300 },
     passive(f, o) {
       f.burn = 0;
-      if (G.phase !== 'fight' || f.state === 'ko') return;
-      if (!f.atk && f.meterV > 0) f.meterV = Math.max(0, f.meterV - 0.1);
-      if (f.meterV >= 100 && !f.atk) {
-        f.meterV = 30; G.fx.push({ type: 'blast', x: f.x, y: f.y - 110, t: 22, max: 22 }); shake(14); sfx('boom'); pop(f, 'OVERHEAT', '#ff6a3a');
-        f.hp = Math.max(1, f.hp - Math.round(f.d.hp * 0.05)); f.hitstun = 24;
-        if (o.state !== 'ko' && Math.abs(o.x - f.x) < 230) landHit(f, o, { dmg: 90, stun: 30, kb: 14, launch: 8, unblock: true, special: true });
+      f.meterV = f.breach > 0 ? f.breach : 0;
+      if (f.breach > 0) {
+        f.breach--;
+        if (G.frame % 3 === 0) spark(f.x + rand(-50, 50), f.y - rand(60, 230), G.frame % 6 ? '#ff8a1c' : '#ffd23a', rand(4, 8), 22, null, -rand(2, 5));
+        if (G.phase === 'fight' && o.state !== 'ko' && Math.abs(o.x - f.x) < 150 && Math.abs(o.y - f.y) < 160 && G.frame % 30 === 0) { o.hp = Math.max(1, o.hp - 10); o.burn = Math.max(o.burn, 60); }
+        if (f.breach === 0) pop(f, 'SUIT SEALED', '#ff8a1c');
       }
     },
-    dmgMul: f => 1 + f.meterV * 0.005,
-    reduce(f, dmg) { return Math.round(dmg * 1.1); },
-    onDeal(f, d, dmg, m) { f.meterV = Math.min(100, f.meterV + (m.special ? 0 : m.heavy ? 14 : 6)); },
-    aiFar(f, o) { return Math.abs(o.x - f.x) < 360 && Math.random() < 0.3 ? 'special' : null; },
+    dmgMul: f => f.breach > 0 ? 1.6 : 1,
+    onDeal(f, d) { d.burn = Math.max(d.burn, f.breach > 0 ? 180 : 90); },
+    aiFar(f) { return !(f.breach > 0) && f.cd === 0 && f.hp > f.d.hp * 0.3 && Math.random() < 0.3 ? 'special' : null; },
     moves: {
-      light: { name: 'Ember Jab', s: 5, a: 4, r: 10, x: 15, y: -180, w: 125, h: 95, dmg: 44, stun: 17, kb: 5 },
-      heavy: { name: 'Cauterise', s: 13, a: 5, r: 19, x: 5, y: -195, w: 150, h: 120, dmg: 74, stun: 23, kb: 10, heavy: true,
-        onHit(f, o) { o.burn = Math.max(o.burn, 150); const h = Math.round(f.d.hp * 0.06); f.hp = Math.min(f.d.hp, f.hp + h); pop(f, '+' + h, '#7dff9a'); } },
-      special: { name: 'Flare Up', s: 12, a: 10, r: 16, x: 30, y: -190, w: 230, h: 110, dmg: 64, stun: 20, kb: 8, cd: 40, special: true,
-        start(f) { f.meterV = Math.min(100, f.meterV + 25); },
-        frame(f) { if (f.atk && f.atk.t >= 12 && f.atk.t < 22 && G.frame % 2 === 0) for (let i = 0; i < 3; i++) spark(f.x + f.face * rand(40, 250), f.y - rand(110, 190), i % 2 ? '#ffd23a' : '#ff6a3a', rand(4, 8), 16, null, -rand(0, 3)); },
-        onHit(f, o) { o.burn = Math.max(o.burn, 120); } },
-      super: { name: 'Blast Furnace', s: 22, a: 1, r: 34, super: true, unblock: true,
+      light: { name: 'Ablaze Claws', s: 4, a: 8, r: 8, hold: true, x: 15, y: -175, w: 130, h: 95,
         frame(f, o, a) {
-          if (a.t < 22 && a.t % 2 === 0) spark(f.x + f.face * 40, f.y - 140, '#ffd23a', 4, 14, f.x + f.face * 40);
-          if (a.t === 22) {
-            G.beams.push({ x0: f.x + f.face * 40, x1: f.face > 0 ? W + 40 : -40, y: f.y - 140, w: 120, color: '#ff6a3a', t: 30, max: 30 }); shake(22); sfx('boom');
-            f.hp = Math.max(1, f.hp - Math.round(f.d.hp * 0.15)); f.meterV = 0;
-            if (o.state !== 'ko' && Math.sign(o.x - f.x) === f.face && o.y > GROUND - 340) { landHit(f, o, { dmg: 200, stun: 40, kb: 18, launch: 10, unblock: true, super: true }); o.burn = 240; }
+          if ((a.t === 5 || a.t === 10) && o.state !== 'ko' && overlap(hitbox(f, a.m), o.box())) { if (landHit(f, o, { dmg: 30, stun: 17, kb: a.t === 10 ? 5 : 1 })) a.hit = true; }
+          if (a.t === 5 || a.t === 10) { sfx('whoosh'); spark(f.x + f.face * 90, f.y - 130, '#ff8a1c', 6, 12); }
+          if (a.t >= 20) f.atk = null;
+        } },
+      heavy: { name: 'Burning Shockwave', s: 14, a: 1, r: 20, heavy: true,
+        frame(f, o, a) {
+          if (a.t !== 14) return;
+          ring(f.x, f.y - 90, 235, '#ff8a1c'); G.waves.push({ x: f.x, t: 26, c: '255,138,28' }); sfx('heavy');
+          if (o.state !== 'ko' && Math.abs(o.x - f.x) < 235 && Math.abs(o.y - f.y) < 180) landHit(f, o, { dmg: 88, stun: 24, kb: 11, heavy: true });
+        } },
+      special: { name: 'Suit Breach', s: 12, a: 0, r: 12, cd: 420, special: true, cond: f => !(f.breach > 0), failText: 'ALREADY OPEN',
+        frame(f, o, a) { if (a.t === 12) { f.breach = 300; f.hp = Math.max(1, f.hp - Math.round(f.d.hp * 0.05)); pop(f, 'SUIT BREACH', '#ff8a1c'); burst(f.x, f.y - 120, '#ff8a1c', 24); shake(10); sfx('boom'); } } },
+      super: { name: 'Flaming Core', s: 20, a: 1, r: 28, super: true, unblock: true,
+        frame(f, o, a) {
+          if (a.t < 20 && a.t % 2 === 0) spark(f.x + rand(-120, 120), f.y - rand(0, 240), '#ffd23a', 4, 18, f.x);
+          if (a.t === 20) {
+            G.fx.push({ type: 'blast', x: f.x, y: f.y - 110, t: 30, max: 30 }); ring(f.x, f.y - 110, 380, '#ff8a1c'); shake(20); sfx('boom'); G.flash = { c: '#ff8a1c', t: 12 };
+            f.breach = 300;
+            if (o.state !== 'ko' && Math.abs(o.x - f.x) < 380 && Math.abs(o.y - f.y) < 300) { landHit(f, o, { dmg: 160, stun: 38, kb: 16, launch: 11, unblock: true, super: true }); o.burn = 240; }
           }
         } }
     },
     moveText: {
-      passive: ['Heat', 'Hits build HEAT (more HEAT = more damage). It cools down when Furnace is not attacking. At full HEAT it overheats: an explosion that hurts both of them. No skin: it takes 10% more damage. Immune to fire.'],
-      light: 'Ember Jab.', heavy: 'Cauterise: sets the enemy on fire and heals Furnace 6%.',
-      special: 'Flare Up: a cone of fire in front (+25 HEAT).',
-      super: 'Blast Furnace: a fire blast across the whole screen. Costs 15% of its own health.'
+      passive: ['Suit', 'His hits set enemies on fire, and he is immune to fire. While the suit is breached (the SUIT bar), he does 60% more damage and his flames burn anyone close to him.'],
+      light: 'Ablaze Claws: two quick burning hits.', heavy: 'Burning Shockwave: a ring of fire around him, on both sides.',
+      special: 'Suit Breach: tears the suit open for 5 seconds. +60% damage, longer burns, and a burning aura. Costs 5% of his health. Can open again 2 seconds after it seals.',
+      super: 'Flaming Core: the whole suit bursts. A huge blast of fire around him, then Suit Breach for free.'
+    }
+  },
+  walker: {
+    name: 'Walker', id: '0068', type: 'Hybrid', ability: 'Stitched Pursuer', color: '#5a96e0',
+    style: 'Pursuer', stats: { hp: 3, pow: 4, spd: 3 },
+    blurb: "Stitched parka, split face, never stops walking. Maw's eternal enemy, and deaf to lies. He sews you shut, then walks right through you.",
+    hp: 1100, walk: 4.6, jumpV: 16.5, drawH: 236, bw: 88, bh: 205, reach: 150,
+    meter: { name: 'STEPS', max: 5, pips: true },
+    passive(f, o) {
+      f.slow = 0; f.lag = 0;
+      if (G.phase !== 'fight' || f.state === 'ko') return;
+      const fwd = f.state === 'walk' && Math.sign(f.vx) === Math.sign(o.x - f.x);
+      f.stepT = (f.stepT || 0) + (fwd ? 2 : f.state === 'walk' ? 1 : 0);
+      if (f.stepT >= 75 && f.meterV < 5) { f.stepT = 0; f.meterV++; }
+      if (f.parka > 0) f.parka--;
+    },
+    dmgMul: f => 1 + 0.04 * f.meterV,
+    reduce(f, dmg) { return f.parka > 0 ? Math.round(dmg * 0.85) : dmg; },
+    aiFar(f) { return f.meterV >= 3 && f.cd === 0 && Math.random() < 0.5 ? 'special' : null; },
+    moves: {
+      light: { name: 'Tear the Seam', s: 4, a: 8, r: 9, hold: true, x: 15, y: -180, w: 130, h: 95,
+        frame(f, o, a) {
+          if ((a.t === 5 || a.t === 10) && o.state !== 'ko' && overlap(hitbox(f, a.m), o.box())) {
+            const r = landHit(f, o, { dmg: 24, stun: 16, kb: a.t === 10 ? 5 : 1 });
+            if (r) { a.hit = true; if (typeof r === 'number') { if (!(o.seamed > 0)) pop(o, 'SEAMED', '#5a96e0'); o.seamed = 240; } }
+          }
+          if (a.t === 5 || a.t === 10) sfx('whoosh');
+          if (a.t >= 21) f.atk = null;
+        } },
+      heavy: { name: 'Stitch Shut', s: 14, a: 5, r: 20, x: 10, y: -195, w: 140, h: 120, dmg: 66, stun: 26, kb: 6, heavy: true,
+        onHit(f, o) { o.seamed = 240; f.parka = 120; pop(o, 'STITCHED', '#5a96e0'); } },
+      special: { name: 'Long Walk', s: 6, hold: true, cd: 40, special: true, cond: f => f.meterV >= 3, failText: 'NEEDS 3 STEPS',
+        frame(f, o, a) {
+          if (a.t === 6) { a.steps = f.meterV; f.meterV = 0; f.ghost = true; sfx('dash'); }
+          if (a.t < 6) return;
+          a.keepVx = true; f.vx = f.face * 16;
+          if (a.t % 3 === 0) G.after.push({ k: f.key, x: f.x, y: f.y, face: f.face, life: 10, img: 'atk' });
+          if (!a.hit && overlap(f.box(), o.box()) && o.state !== 'ko') { a.hit = true; landHit(f, o, { dmg: 60 + 24 * a.steps, stun: 30, kb: 6, special: true, unblock: true }); }
+          const wall = f.x <= LEFT + f.d.bw / 2 + 2 || f.x >= RIGHT - f.d.bw / 2 - 2;
+          if (wall || a.t > 40) { f.vx = 0; a.keepVx = false; f.ghost = false; f.atk = null; }
+        } },
+      super: { name: 'Never Stops', s: 12, hold: true, super: true, unblock: true,
+        frame(f, o, a) {
+          f.inv = 2; if (a.t < 12) return;
+          if (!a.go) { a.go = true; a.n = 0; }
+          a.keepVx = true; f.vx = f.face * 6; a.n++;
+          if (o.state !== 'ko' && Math.abs(o.x - f.x) < f.d.bw / 2 + o.d.bw / 2 + 40) {
+            o.x = clamp(f.x + f.face * (f.d.bw / 2 + o.d.bw / 2 + 10), LEFT + o.d.bw / 2, RIGHT - o.d.bw / 2); o.lock = Math.max(o.lock, 4);
+            if (a.n % 14 === 0 && a.n < 98) landHit(f, o, { dmg: 30, stun: 18, kb: 0, unblock: true, super: true });
+          }
+          if (a.n >= 100) { if (o.state !== 'ko' && Math.abs(o.x - f.x) < 220) { o.lock = 0; landHit(f, o, { dmg: 100, stun: 36, kb: 16, launch: 10, unblock: true, super: true }); } f.vx = 0; a.keepVx = false; f.atk = null; }
+        } }
+    },
+    moveText: {
+      passive: ['Steps', 'He never stops walking: walking (above all towards the enemy) builds Steps, max 5, +4% damage each. Deaf to lies: Slow and Lag do not work on him. Seamed enemies deal 15% less and take 12% more from him.'],
+      light: 'Tear the Seam: two quick hits that Seam the enemy for 4 seconds.', heavy: 'Stitch Shut: a stunning hit that Seams the enemy and hardens his parka (15% less damage for 2 seconds).',
+      special: 'Long Walk (needs 3 Steps, spends them all): walks straight through the enemy and out the other side. Goes through blocks; more Steps, more damage.',
+      super: 'Never Stops: an armoured walk that drags the enemy along with it and tears at them, then one last big hit.'
     }
   }
 
@@ -1672,6 +1707,8 @@ const FAL_SKINS = {
   tomb: [['White Spirit', 'hue-rotate(180deg) saturate(.6) brightness(1.15)'], ['Burnt Out', 'sepia(.6) saturate(.5) brightness(.75)']],
   toon: [['Noir Reel', 'grayscale(.9) contrast(1.15)'], ['Technicolor', 'hue-rotate(140deg) saturate(1.5)']],
   flick: [['Deep Flipside', 'hue-rotate(260deg) saturate(1.5) brightness(.85)'], ['Sea Rot', 'hue-rotate(150deg) saturate(1.4)']],
+  sunburst: [['Blue Flame', 'hue-rotate(190deg) saturate(1.3)'], ['Witchfire', 'hue-rotate(80deg) saturate(1.3)']],
+  walker: [['Frostbitten', 'hue-rotate(-20deg) saturate(.8) brightness(1.15)'], ['Bloodied Parka', 'hue-rotate(140deg) saturate(1.5)']],
   uquna: [['Blood Hell', 'sepia(1) hue-rotate(-30deg) saturate(3)'], ['Negative', 'invert(1) hue-rotate(180deg)']],
   marrowline: [['Gunmetal', 'saturate(.35) brightness(1.15)'], ['Field Grey', 'sepia(.45) hue-rotate(45deg) saturate(.8)']]
 };
@@ -1680,7 +1717,8 @@ const FAL_ART = {
   radiant: [['drawing', 'Horror Drawing']],
   eyianix: [['drawing', 'Horror Drawing']],
   bearer: [['classic', 'Classic'], ['drawing', 'Horror Drawing']],
-  renku: [['scribble', 'Scribble Original']]
+  renku: [['scribble', 'Scribble Original']],
+  sunburst: [['drawing', 'Original Drawing']]
 };
 /* CSS filter functions as colour matrices, so the in-fight sprites match the CSS previews */
 function filterOps(css) {
@@ -1839,13 +1877,14 @@ class Fighter {
     this.evil = 0; this.copying = false; this.inPool = null; this.lookAway = false;
     this.swallow = 0; this.reversed = 0; this.mirror = 0; this.spotted = 0; this.eyes = null; this.eyeT = 0;
     this.grey = 0; this.dolled = 0; this.webbed = 0; this.puppet = 0; this.puppeteer = null; this.tether = 0; this.tetherTo = null; this.lag = 0; this.lagState = null;
+    this.breach = 0; this.seamed = 0; this.parka = 0; this.stepT = 0;
     this.flip = 0; this.flipStore = 0; this.flipWas = false; this.takenRound = 0; this.heard = 0;
     this.asleep = 0; this.drowsy = 0; this.spiral = 0; this.spiralUsed = false; this.hidden = false; this.calm = false; this.curInp = null;
   }
   get grounded() { return this.y >= GROUND - 0.5 && this.vy >= 0; }
   box() { return { x: this.x - this.d.bw / 2, y: this.y - this.d.bh, w: this.d.bw, h: this.d.bh }; }
   walkSpeed() { return this.d.walk * (this.d.walkMul ? this.d.walkMul(this) : 1) * (this.slow > 0 ? 0.6 : 1) * (this.rage > 0 ? 1.3 : 1); }
-  dmgMul() { return (this.d.dmgMul ? this.d.dmgMul(this) : 1) * (this.rage > 0 ? 1.45 : 1) * (this.buffNext > 0 ? 1.5 : 1) * (this.grey > 0 ? 0.85 : 1); }
+  dmgMul() { return (this.d.dmgMul ? this.d.dmgMul(this) : 1) * (this.rage > 0 ? 1.45 : 1) * (this.buffNext > 0 ? 1.5 : 1) * (this.grey > 0 ? 0.85 : 1) * (this.seamed > 0 ? 0.85 : 1); }
   isBlocking() { return (this.state === 'block' || this.blockstun > 0) && this.grounded && !this.atk && this.hitstun <= 0; }
 }
 
@@ -1950,6 +1989,7 @@ function landHit(a, d, m) {
     return 'block';
   }
   if (d.spotted > 0) dmg *= 1.15;
+  if (d.seamed > 0 && a.key === 'walker') dmg *= 1.12;
   if (d.asleep > 0) { dmg *= 1.5; d.asleep = 0; d.lock = 0; pop(d, 'WOKE UP', '#e8dcc0'); }
   if (d.frozen > 0) { dmg *= 1.2; d.frozen = 0; d.lock = 0; pop(d, 'SHATTER', '#bff0ff'); burst(d.x, d.y - 110, '#bff0ff', 20); }
   dmg = Math.round(dmg);
@@ -2249,7 +2289,7 @@ function updateFighter(f, o) {
     if (f.burn % 30 === 0 && f.state !== 'ko') f.hp = Math.max(1, f.hp - 8);
     if (G.frame % 4 === 0) spark(f.x + rand(-30, 30), f.y - rand(20, f.d.bh), G.frame % 8 ? '#ff8a3a' : '#ffd23a', 4, 20, null, -3);
   }
-  for (const k of ['seal', 'claimed', 'armorT', 'parry', 'parryAuto', 'frozen', 'flat', 'buffNext', 'swallow', 'reversed', 'mirror', 'spotted', 'flip', 'grey', 'dolled', 'webbed', 'puppet', 'tether', 'lag', 'asleep', 'drowsy']) if (f[k] > 0) f[k]--;
+  for (const k of ['seal', 'claimed', 'armorT', 'parry', 'parryAuto', 'frozen', 'flat', 'buffNext', 'swallow', 'reversed', 'mirror', 'spotted', 'flip', 'seamed', 'grey', 'dolled', 'webbed', 'puppet', 'tether', 'lag', 'asleep', 'drowsy']) if (f[k] > 0) f[k]--;
   if (f.drowsy > 0) f.slow = Math.max(f.slow, 2);
   if (f.rage > 0 && --f.rage === 0) { pop(f, 'MASK ON', '#e04a8a'); f.hitstun = Math.max(f.hitstun, 30); }
   if (f.soak > 0 && !f.inPool && ++f.soakT % 300 === 0) f.soak--;
@@ -2345,7 +2385,7 @@ function aiThink(f, o) {
   const superRange = { radiant: 300, chaser: 900, ixis: 200, renku: 1400, lycion: 500, weepingangel: 1400, toon: 1400, copyright: 1400, fuja: 330, uquna: 1400, eyianix: 1400, bearer: 1400, marrowline: 1400, flick: 1400 }[f.key] ?? 1200;
   const spec = f.d.moves.special;
   const canSpec = f.cd === 0 && (!spec.cond || spec.cond(f));
-  if (f.sup >= 100 && dist < superRange && Math.random() < P.sup && (!['doommaster', 'glacier', 'tomb', 'painter'].includes(f.key) || o.grounded) && (!['furnace', 'rainbowripper'].includes(f.key) || Math.sign(o.x - f.x) === f.face) && (f.key !== 'hemo' || Math.abs(o.y - f.y) < 60)) { press(I, 'super'); return; }
+  if (f.sup >= 100 && dist < superRange && Math.random() < P.sup && (!['doommaster', 'glacier', 'tomb'].includes(f.key) || o.grounded) && (!['rainbowripper'].includes(f.key) || Math.sign(o.x - f.x) === f.face) && (f.key !== 'hemo' || Math.abs(o.y - f.y) < 60)) { press(I, 'super'); return; }
   if (dist > reach) {
     const act = f.d.aiFar ? f.d.aiFar(f, o) : null;
     if (act && (act !== 'special' || canSpec)) press(I, act);
@@ -2890,6 +2930,7 @@ function drawFighter(f) {
   if (!o.tint && f.mirror > 0) o.tint = ['#e8b86a', 0.3 + 0.15 * Math.sin(t * 0.5)];
   if (!o.tint && f.spotted > 0) o.tint = ['#2fc7d4', 0.18];
   if (!o.tint && f.grey > 0) o.tint = ['#8a8a8a', 0.6];
+  if (!o.tint && f.breach > 0) o.tint = ['#ff8a1c', 0.2 + 0.1 * Math.sin(t * 0.5)];
   if (!o.tint && f.asleep > 0) o.tint = ['#2a3a6a', 0.35];
   if (!o.tint && f.spiral > 0) o.tint = ['#aab2f0', 0.25 + 0.15 * Math.sin(t * 0.6)];
   if (f.lag > 0 && G.frame % 6 < 2) { o.ox = (o.ox || 0) + rand(-8, 8); if (!o.tint) o.tint = ['#ff3b3b', 0.35]; }
@@ -2905,6 +2946,7 @@ function drawFighter(f) {
   if (f.asleep > 0) txt('Z z', f.x + 30, f.y - f.d.bh - 30 - (G.frame % 40), 26, '#e8dcc0');
   if (f.dolled > 0 && f.state !== 'ko') txt('DOLLED', f.x, f.y - f.d.bh - 44, 15, '#a77ae8', 'center', 'body');
   if (f.lag > 0 && f.state !== 'ko') txt('LAG', f.x, f.y - f.d.bh - 24, 16, '#ff3b3b', 'center', 'body');
+  if (f.seamed > 0 && f.state !== 'ko') txt('SEAMED', f.x, f.y - f.d.bh - 8, 14, '#5a96e0', 'center', 'body');
   if (f.webbed > 0) { cx.strokeStyle = 'rgba(194,42,74,.7)'; cx.lineWidth = 2; for (let i = -2; i <= 2; i++) { cx.beginPath(); cx.moveTo(f.x + i * 22, f.y - f.d.bh); cx.lineTo(f.x - i * 22, f.y); cx.stroke(); } }
   if (f.reversed > 0 && f.state !== 'ko') txt('⇄', f.x, f.y - f.d.bh - 40, 34, '#e8b86a');
   if (f.swallow > 0) { const hx = f.x + f.face * 90; cx.strokeStyle = 'rgba(138,108,255,.8)'; cx.lineWidth = 4; for (let i = 0; i < 3; i++) { cx.beginPath(); cx.arc(hx, f.y - 120, 30 + ((G.frame * 3 + i * 25) % 75), 0, 7); cx.stroke(); } cx.fillStyle = '#05030a'; cx.beginPath(); cx.arc(hx, f.y - 120, 26, 0, 7); cx.fill(); }
@@ -3366,7 +3408,7 @@ function renderSelect() {
     $('#sw' + s).innerHTML = picked ? list.map((sk, j) => { const p = skinPreview(k, j); return `<button class="sw" data-s="${s}" data-j="${j}" aria-pressed="${G.skins[s] === j}" title="${sk.name}" aria-label="Colour: ${sk.name}"><img src="${p.src}" alt="" style="filter:${p.filter}${(s === 1) !== !!d.faceLeft ? ';transform:scaleX(-1)' : ''}"></button>`; }).join('') : '';
     const st = $('#state' + s);
     st.className = 'state' + (SEL.ready[s] ? ' ready' : '');
-    st.textContent = SEL.ready[s] ? 'CLEARED' : picked ? (isTouch ? `Colour: ${list[G.skins[s]].name}` : `Colour: ${list[G.skins[s]].name} · ${s === 1 && G.mode === '2p' ? ', ' : 'J'} to lock in`) : (isTouch ? 'Tap a fighter' : 'Choose a fighter');
+    st.textContent = SEL.ready[s] ? 'CLEARED' : picked ? (isTouch ? `Colour: ${list[G.skins[s]].name}` : `Colour: ${list[G.skins[s]].name} · press ${s === 1 && G.mode === '2p' ? 'comma' : 'J'} to lock in`) : (isTouch ? 'Tap a fighter' : 'Choose a fighter');
   }
   for (const sw of document.querySelectorAll('.sw')) sw.onclick = () => { const s = +sw.dataset.s; G.skins[s] = +sw.dataset.j; SEL.ready[s] = false; renderSelect(); };
   document.querySelectorAll('.ico').forEach((b, i) => {
